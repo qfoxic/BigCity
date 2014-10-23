@@ -1,5 +1,5 @@
 from rest_framework import serializers
-#import common.lib as clib
+from common import constants as co
 
 """
 The basic idea is that we have nodes and their resources.
@@ -15,27 +15,40 @@ Specific node type must inherit NodeSerializer, specify it's own type, specify
 serializer for data.
 """
 
-class NodeSerializer(serializers.Serializer):
+def unix_perm_validator(value):
+    pass
+
+class AbstractNodeSerializer(serializers.Serializer):
     uid = serializers.IntegerField(required=True, min_value=1)
     gid = serializers.IntegerField(required=True, min_value=1)
     # Can be of different types. Like google appengine.
-    ntype = serializers.CharField(required=True, max_length=15)
+    ntype = serializers.CharField(source='get_type', required=True, max_length=15)
     #timestamp
     created = serializers.DateTimeField(auto_now_add=True, read_only=True)
     #timestamp
     updated = serializers.DateTimeField(auto_now=True, read_only=True)
     #unix permission.
-    perm = 
-    # Parent node.
-    pnid
-    # typical access level.
-    access_level
+    perm = serializers.CharField(validators=[unix_perm_validator], default='666')
+    # Parent node. Mongo object id.
+    pnid = serializers.CharField(max_length=24, min_length=24)
+    # typical access level. 0 - private, 1 - public
+    access_level = serializers.IntegerField(default=co.PRIVATE_ACCESS)
     # Shared to uids.
-    shared
-    # Some data - python dict.
-    data
-    # Tag = specific to resources only.
-    tag = 
+    shared = serializers.CharField()
+    # Some name can be used to determine an object.
+    name = serializers.CharField(source='get_type')
+
+    def get_type(self):
+        raise NotImplemented()
 
 
+#TODO implement specific data field.
+class NodeSerializer(AbstractNodeSerializer):
+    def get_type(self):
+        return 'node'
+
+
+class ResourceSerializer(AbstractNodeSerializer):
+    def get_type(self):
+        return 'resource'
 

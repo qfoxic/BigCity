@@ -1,9 +1,5 @@
-import common.lib as clib
-import common.constants as co
-
-
-def _get_node_serializer(request):
-    pass
+import mfs.common.lib as clib
+import mfs.common.constants as co
 
 
 def ls(request, uid):

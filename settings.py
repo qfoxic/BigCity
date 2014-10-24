@@ -37,8 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'groups',
-    'users',
+    'mfs',
     'common'
 )
 
@@ -88,6 +87,8 @@ USE_L10N = True
 
 USE_TZ = True
 
+MONGO_HOST = '127.0.0.1'
+MONGO_PORT = 27017
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/

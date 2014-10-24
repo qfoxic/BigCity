@@ -1,9 +1,9 @@
-from groups.serializers import GroupSerializer
-import common.lib as clib
+import mfs.common.lib as clib
+from mfs.groups.serializers import GroupSerializer
 
 
 def ls(request):
-    queryset = GroupSerializer.model().objects.all()
+    queryset = GroupSerializer.Meta.model.objects.all()
     return GroupSerializer(queryset, many=True).data
 
 

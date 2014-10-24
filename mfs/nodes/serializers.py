@@ -15,40 +15,52 @@ Specific node type must inherit NodeSerializer, specify it's own type, specify
 serializer for data.
 """
 
+
 def unix_perm_validator(value):
     pass
 
-class AbstractNodeSerializer(serializers.Serializer):
-    uid = serializers.IntegerField(required=True, min_value=1)
-    gid = serializers.IntegerField(required=True, min_value=1)
+
+class AbstractRecordSerializer(serializers.Serializer):
     # Can be of different types. Like google appengine.
-    ntype = serializers.CharField(source='get_type', required=True, max_length=15)
+    record_type = serializers.CharField(source='get_type', required=True, max_length=15)
     #timestamp
     created = serializers.DateTimeField(auto_now_add=True, read_only=True)
     #timestamp
     updated = serializers.DateTimeField(auto_now=True, read_only=True)
-    #unix permission.
-    perm = serializers.CharField(validators=[unix_perm_validator], default='666')
-    # Parent node. Mongo object id.
-    pnid = serializers.CharField(max_length=24, min_length=24)
-    # typical access level. 0 - private, 1 - public
-    access_level = serializers.IntegerField(default=co.PRIVATE_ACCESS)
+    #timestamp
+    deleted = serializers.DateTimeField()
+    # Parent record. Mongo object id.
+    parent_record = serializers.CharField(max_length=24, min_length=24)
     # Shared to uids.
     shared = serializers.CharField()
+    # typical access level. 0 - private, 1 - public
+    access_level = serializers.IntegerField(default=co.PRIVATE_ACCESS)
     # Some name can be used to determine an object.
-    name = serializers.CharField(source='get_type')
+    name = serializers.CharField(source='get_name')
 
     def get_type(self):
         raise NotImplemented()
 
+    def get_name(self):
+        raise NotImplemented()
 
-#TODO implement specific data field.
-class NodeSerializer(AbstractNodeSerializer):
+
+class NodeSerializer(AbstractRecordSerializer):
+    uid = serializers.IntegerField(required=True, min_value=1)
+    gid = serializers.IntegerField(required=True, min_value=1)
+    #unix permission.
+    perm = serializers.CharField(validators=[unix_perm_validator], default='666')
+
     def get_type(self):
         return 'node'
 
+    def get_name(self):
+        return 'node'
 
-class ResourceSerializer(AbstractNodeSerializer):
+
+class ResourceSerializer(AbstractRecordSerializer):
     def get_type(self):
         return 'resource'
 
+    def get_name(self):
+        return 'resource'

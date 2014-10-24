@@ -1,11 +1,12 @@
 from rest_framework import viewsets, permissions
-from common.permissions import IsAdminGroup
 from rest_framework.response import Response
-import groups.lib as grp
+
+import mfs.groups.lib as grp
+from mfs.common.permissions import IsAdminGroup
 
 
 class GroupViewSet(viewsets.ViewSet):
-    permission_classes=[IsAdminGroup, permissions.IsAuthenticated]
+    permission_classes = [IsAdminGroup, permissions.IsAuthenticated]
 
     def list(self, request):
         return Response(data=grp.ls(request)) 

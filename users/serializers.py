@@ -5,16 +5,15 @@ import mfs.common.lib as clib
 from mfs.users.serializers import UserSerializer
 
 
-def mongo_save_user_profile(uid, data):
-    usr = clib.mongo_collection('city', 'user_profiles')
+@clib.mongo_connect('city', 'user_profiles')
+def mongo_save_user_profile(conn, uid, data):
     data['uid'] = uid
-    return usr.update({'uid': uid}, data, upsert=True)
+    return conn.update({'uid': uid}, data, upsert=True)
 
 
-def mongo_get_user_profile(uid, fields):
-    #TODO make a decorator.
-    usr = clib.mongo_collection('city', 'user_profiles')
-    cursor = usr.find({'uid': uid}, {f: 1 for f in fields})
+@clib.mongo_connect('city', 'user_profiles')
+def mongo_get_user_profile(conn, uid, fields):
+    cursor = conn.find({'uid': uid}, {f: 1 for f in fields})
     res = [i for i in cursor]
     if res:
         return res[0] # Dict with results.

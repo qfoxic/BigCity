@@ -1,58 +1,60 @@
-from rest_framework import viewsets, permissions
+from rest_framework import permissions
 from rest_framework.decorators import action, link
 from rest_framework.response import Response
 from rest_framework import status
 
 import mfs.users.lib as usr
 import mfs.groups.lib as grp
-from mfs.users.serializers import UserSerializer
+import mfs.common.views as vws
 
 
-class UserViewSet(viewsets.ViewSet):
+class UserViewSet(vws.BaseViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    serializer = UserSerializer
+    manager_class = usr.UsersManager
 
     def list(self, request):
-        return Response(data=usr.ls(request, self.serializer))
+        return Response(data=self.manager.ls())
 
     def create(self, request):
-        return Response(data=usr.add(request, self.serializer))
+        return Response(data=self.manager.add())
 
     def retrieve(self, request, pk=None):
-        return Response(data=usr.data(request, pk, self.serializer))
+        return Response(data=self.manager.data(pk))
 
     def update(self, request, pk=None):
-        return Response(data=usr.upd(request, pk, self.serializer))
+        return Response(data=self.manager.upd(pk))
 
     def destroy(self, request, pk=None):
-        return Response(data=usr.rm(request, pk, self.serializer))
+        return Response(data=self.manager.rm(pk))
 
     @action()
     def chpasswd(self, request, pk=None):
-        return Response(data=usr.chpasswd(request, pk, self.serializer))
+        return Response(data=self.manager.chpasswd(pk))
 
     @action()
     def addgroup(self, request, pk=None):
         gid = request.DATA.get('gid')
-        res = grp.data(request, gid)
+        group_manager = grp.GroupManager(request)
+        res = group_manager.data(gid)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
-        res = usr.data(request, pk, self.serializer)
+        res = self.manager.data(pk)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data=usr.add_group(request, pk, gid, self.serializer))
+        return Response(data=self.manager.add_group(pk, gid))
 
     @action()
     def rmgroup(self, request, pk=None):
         gid = request.DATA.get('gid')
-        res = grp.data(request, gid)
+        group_manager = grp.GroupManager(request)
+        res = group_manager.data(gid)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
-        res = usr.data(request, pk, self.serializer)
+        res = self.manager.data(pk)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data=usr.rm_group(request, pk, gid, self.serializer))
+        return Response(data=self.manager.rm_group(pk, gid))
 
     @link()
     def groups(self, request, pk=None):
-        return Response(data=usr.groups(request, pk, self.serializer))
+        return Response(data=self.manager.groups(pk))

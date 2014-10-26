@@ -50,6 +50,8 @@ class NodeSerializer(AbstractRecordSerializer):
     gid = serializers.IntegerField(required=True, min_value=1)
     #unix permission.
     perm = serializers.CharField(validators=[unix_perm_validator], default='666')
+    # comma separated path of entity's ids.
+    path = serializers.CharField(required=True, max_length=3000)
 
     def get_type(self):
         return 'node'

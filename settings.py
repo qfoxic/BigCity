@@ -90,6 +90,10 @@ USE_TZ = True
 MONGO_HOST = '127.0.0.1'
 MONGO_PORT = 27017
 
+from mongoengine import connect
+
+client = connect('city', host=MONGO_HOST, port=MONGO_PORT)
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 

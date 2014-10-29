@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from django.test.utils import setup_test_environment
 setup_test_environment()
 
+from mongoengine import connect
+client = connect('test_city')
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -23,5 +25,7 @@ class UserTests(APITestCase):
                 'resume': 'super_file'}
         response = self.client.post('/user/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        import pdb;pdb.set_trace()
+        user_id = response.data['result']['id']
+        response = self.client.get('/user/{}/'.format(user_id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 

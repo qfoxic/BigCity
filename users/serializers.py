@@ -3,10 +3,12 @@ from rest_framework import serializers
 
 import mfs.common.lib as clib
 from mfs.users.serializers import UserSerializer
+from mfs.users.lib import UsersManager
 
 
 @clib.mongo_connect('city', 'user_profiles')
 def mongo_save_user_profile(conn, uid, data):
+    raise Exception(conn, uid, data)
     data['uid'] = uid
     return conn.update({'uid': uid}, data, upsert=True)
 
@@ -20,14 +22,8 @@ def mongo_get_user_profile(conn, uid, fields):
     return {}
 
 
-class MongoCharField(serializers.CharField):
-    def field_to_native(self, obj, field_name):
-        d = mongo_get_user_profile(obj.pk, (field_name,))
-        return d.get(field_name, '')
-
-
 class RegularUserSerializer(UserSerializer):
-    resume = MongoCharField(max_length=100000, required=False)
+    resume = serializers.CharField(max_length=100000, required=False)
 
     class Meta:
         model = User
@@ -35,7 +31,16 @@ class RegularUserSerializer(UserSerializer):
                   'is_active', 'resume')
         write_only_fields = ('password',)
 
+    def restore_object(self, attrs, instance=None):
+        obj = super(RegularUserSerializer, self).restore_object(attrs, instance)
+        raise Exception(attrs, instance, obj)
+        return obj
+
     def save_object(self, obj, **kwargs):
         super(RegularUserSerializer, self).save_object(obj, **kwargs)
         data = {'resume': self.data.get('resume')}
         mongo_save_user_profile(obj.pk, data)
+
+
+class RegularUserManager(UsersManager):
+    serializer = RegularUserSerializer

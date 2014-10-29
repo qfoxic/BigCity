@@ -1,6 +1,7 @@
 from mfs.users.views import UserViewSet
-from users.serializers import RegularUserSerializer
+from users.serializers import RegularUserManager
 
 
 class RegularUserViewSet(UserViewSet):
-    serializer = RegularUserSerializer
+    manager_class = RegularUserManager
+

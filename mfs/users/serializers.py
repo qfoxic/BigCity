@@ -6,7 +6,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name',
-                  'is_active')
+                  'is_active', 'password')
         write_only_fields = ('password',)
 
     # turn text to hashed password

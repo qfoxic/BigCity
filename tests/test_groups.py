@@ -55,6 +55,6 @@ class GroupSuperUserTests(APITestCase):
         response = self.client.get('/group/', format='json')
         self.assertEqual(response.data, [{'id': 1, 'name': u'test'},
                                          {'id': 2, 'name': u'test1'}])
-        
+
 
 

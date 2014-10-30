@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from rest_framework.response import Response
+from rest_framework import status
 
 import mfs.groups.lib as grp
 from mfs.common.views import BaseViewSet
@@ -14,13 +15,19 @@ class GroupViewSet(BaseViewSet):
         return Response(data=self.manager.ls())
 
     def create(self, request):
-        return Response(data=self.manager.add())
+        res = self.manager.add()
+        if res.get('error'):
+            return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data=res)
 
     def retrieve(self, request, pk=None):
         return Response(data=self.manager.data(pk))
 
     def update(self, request, pk=None):
-        return Response(data=self.manager.upd(pk))
+        res = self.manager.upd(pk)
+        if res.get('error'):
+            return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data=res)
 
     def destroy(self, request, pk=None):
         return Response(data=self.manager.rm(pk))

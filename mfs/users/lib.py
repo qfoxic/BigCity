@@ -73,4 +73,4 @@ class UsersManager(clib.BaseManager):
             user = self.serializer.Meta.model.objects.get(pk=uid)
         except Exception, e:
             return clib.jsonerror(str(e))
-        return clib.jsonresult(user.groups.values_list('name', flat=True))
+        return clib.jsonresult(user.groups.values_list('id', 'name'))

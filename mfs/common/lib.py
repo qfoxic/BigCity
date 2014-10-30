@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 
 
 class BaseManager(object):
@@ -26,5 +27,5 @@ def get_obj(serializer, pk):
     try:
         instance = serializer.Meta.model.objects.get(pk=pk)
     except (ObjectDoesNotExist, ValueError), e:
-        return jsonerror('Object id:<%s> does not exists' % (pk), str(e))
+        raise Http404
     return {'object': instance}

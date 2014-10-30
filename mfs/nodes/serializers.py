@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from common import constants as co
+from mfs.common import constants as co
 
 """
 The basic idea is that we have nodes and their resources.

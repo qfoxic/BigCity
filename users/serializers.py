@@ -2,15 +2,8 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from mfs.users.serializers import UserSerializer
-from mfs.users.lib import UsersManager
-
-from mongoengine import Document, fields
-
-
-class MongoUser(Document):
-    resume = fields.StringField(max_length=100000)
-    # User id.
-    id = fields.IntField(required=True, primary_key=True)
+from mfs.users.managers import UsersManager
+from users.models import MongoUser
 
 
 class OneToOneMongoProxyField(serializers.CharField):

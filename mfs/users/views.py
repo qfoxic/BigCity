@@ -5,8 +5,8 @@ from rest_framework.decorators import action, link
 from rest_framework.response import Response
 from rest_framework import status
 
-import mfs.users.lib as usr
-import mfs.groups.lib as grp
+import mfs.users.managers as usr
+import mfs.groups.managers as grp
 import mfs.common.views as vws
 
 

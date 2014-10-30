@@ -2,7 +2,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
 
-import mfs.groups.lib as grp
+import mfs.groups.managers as grp
 from mfs.common.views import BaseViewSet
 from mfs.common.permissions import IsAdminGroup
 

@@ -1,6 +1,6 @@
 import datetime
 
-from mongoengine import Document, fields
+from mongoengine import Document, fields, NULLIFY, CASCADE
 from mfs.common import constants as co
 from mfs.users.models import MongoUser
 
@@ -20,7 +20,7 @@ class Node(Document):
     #timestamp
     deleted = fields.DateTimeField()
     # Parent record. Mongo object id.
-    parent = fields.ReferenceField('Node', reverse_delete_rule=fields.NULLIFY)
+    parent = fields.ReferenceField('self', reverse_delete_rule=NULLIFY)
     # Shared to uids.
     shared = fields.ListField(fields.ReferenceField(MongoUser))
     # typical access level. 0 - private, 1 - public
@@ -46,7 +46,7 @@ class Resource(Document):
     #timestamp
     updated = fields.DateTimeField(required=True, default=datetime.datetime.now)
     # Parent record. Mongo object id. We don't have resource parents
-    parent = fields.ReferenceField('Node', reverse_delete_rule=fields.CASCADE)
+    parent = fields.ReferenceField('Node', reverse_delete_rule=CASCADE)
     # typical access level. 0 - private, 1 - public
     access_level = fields.IntField(
         choices=[co.PRIVATE_ACCESS, co.PRIVATE_ACCESS],
@@ -61,3 +61,7 @@ class Resource(Document):
     @classmethod
     def get_tag(self):
         return 'resource'
+
+class GeoResource(Resource):
+    geo = 
+

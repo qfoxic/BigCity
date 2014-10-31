@@ -1,11 +1,12 @@
 from rest_framework import permissions
-from rest_framework.decorators import action, link
+from rest_framework.decorators import action, link, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 
 import mfs.users.managers as usr
 import mfs.groups.managers as grp
 import mfs.common.views as vws
+
 
 #TODO Add reset password.
 class UserViewSet(vws.BaseViewSet):
@@ -14,13 +15,6 @@ class UserViewSet(vws.BaseViewSet):
 
     def list(self, request):
         return Response(data=self.manager.ls())
-
-    #TODO Add decorator with another permission.
-    def create(self, request):
-        res = self.manager.add()
-        if res.get('error'):
-            return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data=res)
 
     def retrieve(self, request, pk=None):
         return Response(data=self.manager.data(pk))
@@ -65,6 +59,17 @@ class UserViewSet(vws.BaseViewSet):
     @link()
     def groups(self, request, pk=None):
         return Response(data=self.manager.groups(pk))
+
+
+class UserRegisterView(vws.BaseViewSet):
+    permission_classes = [permissions.AllowAny]
+    manager_class = usr.UsersManager
+
+    def create(self, request):
+        res = self.manager.add()
+        if res.get('error'):
+            return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data=res)
 
 
 class UserLoginView(vws.BaseViewSet):

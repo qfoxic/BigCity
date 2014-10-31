@@ -29,7 +29,6 @@ class Node(Document):
         default=co.PRIVATE_ACCESS)
     # Some name can be used to determine an object.
     tag = fields.StringField(default=Node.get_tag)
-    title = fields.StringField(default='')
 
     @classmethod
     def get_type(cls):

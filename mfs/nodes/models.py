@@ -6,17 +6,21 @@ from mfs.users.models import MongoUser
 
 
 class Node(Document):
+    meta = {
+        'allow_inheritance': True
+    }
+
     uid = fields.IntField(required=True, min_value=1)
     gid = fields.IntField(required=True, min_value=1)
     #unix permission.
     perm = fields.StringField(default='666')
     # comma separated path of entity's ids.
     path = fields.StringField(required=True, max_length=3000)
-    record_type = fields.StringField(required=True, max_length=15, default=Node.get_type)
+    record_type = fields.StringField(max_length=15, default=Node.get_type)
     #timestamp
-    created = fields.DateTimeField(required=True)
+    created = fields.DateTimeField()
     #timestamp
-    updated = fields.DateTimeField(required=True, default=datetime.datetime.now)
+    updated = fields.DateTimeField(default=datetime.datetime.now)
     #timestamp
     deleted = fields.DateTimeField()
     # Parent record. Mongo object id.
@@ -40,17 +44,17 @@ class Node(Document):
 
 
 class Resource(Document):
-    record_type = fields.StringField(required=True, max_length=15, default=Resource.get_type)
+    meta = {
+        'allow_inheritance': True
+    }
+
+    record_type = fields.StringField(max_length=15, default=Resource.get_type)
     #timestamp
-    created = fields.DateTimeField(required=True)
+    created = fields.DateTimeField()
     #timestamp
-    updated = fields.DateTimeField(required=True, default=datetime.datetime.now)
+    updated = fields.DateTimeField(default=datetime.datetime.now)
     # Parent record. Mongo object id. We don't have resource parents
     parent = fields.ReferenceField('Node', reverse_delete_rule=CASCADE)
-    # typical access level. 0 - private, 1 - public
-    access_level = fields.IntField(
-        choices=[co.PRIVATE_ACCESS, co.PRIVATE_ACCESS],
-        default=co.PRIVATE_ACCESS)
     # Some name can be used to determine an object.
     tag = fields.StringField(default=Resource.get_tag)
 
@@ -62,6 +66,24 @@ class Resource(Document):
     def get_tag(self):
         return 'resource'
 
+
+#Used for geospacial requests
 class GeoResource(Resource):
-    geo = 
+    @classmethod
+    def get_type(self):
+        return 'geo_location'
+
+    @classmethod
+    def get_tag(self):
+        return 'geo_location'
+
+#Used for similarity search.
+class SearchVector(Resource):
+    @classmethod
+    def get_type(self):
+        return 'vector'
+
+    @classmethod
+    def get_tag(self):
+        return 'vector'
 

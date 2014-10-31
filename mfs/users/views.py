@@ -1,5 +1,3 @@
-from django.contrib.auth import authenticate, login
-
 from rest_framework import permissions
 from rest_framework.decorators import action, link
 from rest_framework.response import Response
@@ -9,7 +7,7 @@ import mfs.users.managers as usr
 import mfs.groups.managers as grp
 import mfs.common.views as vws
 
-
+#TODO Add reset password.
 class UserViewSet(vws.BaseViewSet):
     permission_classes = [permissions.IsAuthenticated]
     manager_class = usr.UsersManager
@@ -17,6 +15,7 @@ class UserViewSet(vws.BaseViewSet):
     def list(self, request):
         return Response(data=self.manager.ls())
 
+    #TODO Add decorator with another permission.
     def create(self, request):
         res = self.manager.add()
         if res.get('error'):
@@ -70,11 +69,23 @@ class UserViewSet(vws.BaseViewSet):
 
 class UserLoginView(vws.BaseViewSet):
     permission_classes = [permissions.AllowAny]
+    manager_class = usr.UsersManager
 
     def create(self, request):
-        username, password = request.DATA.get('username'), request.DATA.get('password')
-        user = authenticate(username=username, password=password)
-        if user:
-            login(request, user)
+        username, password = (request.DATA.get('username'),
+                              request.DATA.get('password'))
+        res = self.manager.login(request, username, password)
+        if res:
+            return Response()
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLogoutView(vws.BaseViewSet):
+    permission_classes = [permissions.AllowAny]
+    manager_class = usr.UsersManager
+
+    def list(self, request):
+        res = self.manager.logout(request)
+        if res:
             return Response()
         return Response(status=status.HTTP_400_BAD_REQUEST)

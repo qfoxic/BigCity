@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from mfs.users.serializers import UserSerializer
 from mfs.users.managers import UsersManager
-from users.models import MongoUser
+from mfs.users.models import MongoUser
 
 
 class OneToOneMongoProxyField(serializers.CharField):

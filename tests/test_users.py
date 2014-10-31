@@ -125,7 +125,7 @@ class UserTests(APITestCase):
         self.assertEqual(list(response.data['result']), [])
 
     def test_login(self):
-        self.client.logout()
+        self.client.get('/logout/')
         data = {'name': 'test'}
         response = self.client.post('/group/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -138,7 +138,7 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_incorrect_login(self):
-        self.client.logout()
+        self.client.get('/logout/')
         data = {'name': 'test'}
         response = self.client.post('/group/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -154,7 +154,7 @@ class UserTests(APITestCase):
         response = self.client.post('/user/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         user_id = response.data['result']['id']
-        self.client.logout()
+        self.client.get('/logout/')
         response = self.client.post('/login/', {'username': 'test',
                                                 'password': '1234567890'},
                                     format='json')
@@ -162,7 +162,7 @@ class UserTests(APITestCase):
         response = self.client.post('/user/{}/chpasswd/'.format(user_id),
                                     {'password': 'qwerty'},
                                     format='json')
-        self.client.logout()
+        self.client.get('/logout/')
         response = self.client.post('/login/', {'username': 'test',
                                                 'password': 'qwerty'},
                                     format='json')

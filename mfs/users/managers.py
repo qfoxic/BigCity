@@ -1,9 +1,24 @@
+from django.contrib.auth import authenticate, login, logout
 import mfs.common.lib as clib
 from mfs.users.serializers import UserSerializer
 
 
 class UsersManager(clib.BaseManager):
     serializer = UserSerializer
+
+    def logout(self, request):
+        try:
+            logout(request)
+            return True
+        except Exception:
+            return False
+
+    def login(self, request, username, password):
+        user = authenticate(username=username, password=password)
+        if user:
+            login(request, user)
+            return True
+        return False
 
     def ls(self):
         queryset = self.serializer.Meta.model.objects.all()

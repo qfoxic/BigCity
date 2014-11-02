@@ -2,8 +2,7 @@ import datetime
 
 from mongoengine import Document, fields, NULLIFY, CASCADE
 from mfs.common import constants as co
-from mfs.users.models import MongoUser
-
+Document.save()
 
 class Node(Document):
     meta = {
@@ -21,26 +20,22 @@ class Node(Document):
     created = fields.DateTimeField()
     #timestamp
     updated = fields.DateTimeField(default=datetime.datetime.now)
-    #timestamp
-    deleted = fields.DateTimeField()
     # Parent record. Mongo object id.
     parent = fields.ReferenceField('self', reverse_delete_rule=NULLIFY)
     # Shared to uids.
-    shared = fields.ListField(fields.ReferenceField(MongoUser))
+    shared = fields.ListField()
     # typical access level. 0 - private, 1 - public
     access_level = fields.IntField(
         choices=[co.PRIVATE_ACCESS, co.PRIVATE_ACCESS],
         default=co.PRIVATE_ACCESS)
-    # Some name can be used to determine an object.
-    tag = fields.StringField(default=Node.get_tag)
 
     @classmethod
     def get_type(cls):
         return 'node'
 
-    @classmethod
-    def get_tag(cls):
-        return 'node'
+    def save(self, *args, **kwargs):
+        #self.path = 
+        return super(Node, self).save(*args, **kwargs)
 
 
 class Resource(Document):
@@ -69,6 +64,10 @@ class Resource(Document):
 
 #Used for geospacial requests
 class GeoResource(Resource):
+
+    def resolve_to_geo(self, address):
+        pass
+
     @classmethod
     def get_type(self):
         return 'geo_location'
@@ -77,8 +76,14 @@ class GeoResource(Resource):
     def get_tag(self):
         return 'geo_location'
 
+
 #Used for similarity search.
 class SearchVector(Resource):
+
+    def normalize(self, data):
+        """Returns normal of a vector to optimize searching."""
+        pass
+
     @classmethod
     def get_type(self):
         return 'vector'

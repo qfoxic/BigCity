@@ -1,20 +1,23 @@
 import mfs.common.lib as clib
+from mfs.nodes.serializers import NodeSerializer
 
+#TODO. Create init super user and some init group.
 
 class NodesManager(clib.BaseManager):
-    def ls(self, uid):
-        pass
-        #srl = _get_user_serializer(request)
-        #queryset = srl.model().objects.all()
-        #return clib.jsonresult(srl(queryset, many=True).data)
+    serializer = NodeSerializer
 
-    def add(self, uid):
-        pass
-        #srl = _get_user_serializer(request)(data=request.DATA)
-        #if srl.is_valid():
-        #    srl.save()
-        #    return clib.jsonresult(srl.data)
-        #return clib.jsonerror(''.join([','.join(e) for e in srl.errors.values()]))
+    def ls(self):
+        queryset = self.serializer.Meta.model.objects.all()
+        return clib.jsonresult(self.serializer(queryset, many=True).data)
+
+    def add(self, uid, gid):
+        data = {'uid': uid, 'gid': gid}
+        data.update(self.request.DATA)
+        s = self.serializer(data=data)
+        if s.is_valid():
+            s.save()
+            return clib.jsonresult(s.data)
+        return clib.jsonerror(''.join([','.join(e) for e in s.errors.values()]))
 
     def rm(self, nid):
         pass

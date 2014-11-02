@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from rest_framework.decorators import action, link, permission_classes
+from rest_framework.decorators import action, link
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -62,7 +62,7 @@ class UserViewSet(vws.BaseViewSet):
 
 
 class UserRegisterView(vws.BaseViewSet):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.AllowAny,]
     manager_class = usr.UsersManager
 
     def create(self, request):

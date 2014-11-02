@@ -43,7 +43,7 @@ class UserTests(APITestCase):
         data = {'username': 'test', 'email': 'wwww@www.www',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
-        response = self.client.post('/user/', data, format='json')
+        response = self.client.post('/user/register/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         user_id = response.data['result']['id']
         data = {'email': 'ww1@www.www', 'resume': 'test2', 'id': user_id}
@@ -91,7 +91,7 @@ class UserTests(APITestCase):
         udata = {'username': 'test', 'email': 'wwww@www.www',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
-        response = self.client.post('/user/', udata, format='json')
+        response = self.client.post('/user/register/', udata, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         user_id = response.data['result']['id']
         response = self.client.post('/user/{}/addgroup/'.format(user_id),

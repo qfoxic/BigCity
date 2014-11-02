@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from mfs.common import constants as co
+from mfs.nodes.models import Node
 
 """
 The basic idea is that we have nodes and their resources.
@@ -16,3 +17,9 @@ serializer for data.
 """
 
 
+class NodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Node
+        fields = ('id', 'uid', 'gid', 'perm', 'path', 'record_type',
+                  'created', 'updated', 'parent', 'shared',
+                  'access_level')

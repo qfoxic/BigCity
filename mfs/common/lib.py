@@ -29,3 +29,16 @@ def get_obj(serializer, pk):
     except (ObjectDoesNotExist, ValueError), e:
         raise Http404
     return {'object': instance}
+
+def check_perm(self, node, user, perm):
+    #TODO. FINISH that. and then update operation.
+    perm, uid= node['perm'], user['id']
+    owner, group, other = int(perm[0]), int(perm[1]), int(perm[2])
+    user_gids = [i[0] for i in user['groups']]
+    # Check owner permissions.
+    if uid == node['uid']:
+        return bool(owner & perm)
+    elif user_gids:
+        return bool(group & perm)
+    else:
+        return bool(other & perm)

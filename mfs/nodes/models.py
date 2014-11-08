@@ -1,8 +1,7 @@
 import datetime
 
 from mongoengine import Document, fields, NULLIFY, CASCADE
-from mfs.common import constants as co
-Document.save()
+
 
 class Node(Document):
     meta = {
@@ -10,31 +9,40 @@ class Node(Document):
     }
 
     uid = fields.IntField(required=True, min_value=1)
-    gid = fields.IntField(required=True, min_value=1)
     #unix permission.
     perm = fields.StringField(default='666')
     # comma separated path of entity's ids.
-    path = fields.StringField(required=True, max_length=3000)
-    record_type = fields.StringField(max_length=15, default=Node.get_type)
+    path = fields.StringField(max_length=3000)
+    kind = fields.StringField(max_length=15)
     #timestamp
     created = fields.DateTimeField()
     #timestamp
-    updated = fields.DateTimeField(default=datetime.datetime.now)
+    updated = fields.DateTimeField(default=datetime.datetime.utcnow())
     # Parent record. Mongo object id.
     parent = fields.ReferenceField('self', reverse_delete_rule=NULLIFY)
     # Shared to uids.
     shared = fields.ListField()
-    # typical access level. 0 - private, 1 - public
-    access_level = fields.IntField(
-        choices=[co.PRIVATE_ACCESS, co.PRIVATE_ACCESS],
-        default=co.PRIVATE_ACCESS)
+    # We can use access_levels instead of groups.
+    access_level = fields.ListField()
 
-    @classmethod
-    def get_type(cls):
+    def get_kind(self):
         return 'node'
 
     def save(self, *args, **kwargs):
-        #self.path = 
+        if not self.created:
+            self.created = datetime.datetime.utcnow()
+        self.kind = self.get_kind()
+        super(Node, self).save(*args, **kwargs)
+
+        path = self.path.split('.') if self.path else []
+        cid = str(self.id)
+        if not cid in path:
+            path.append(cid)
+            o = self.parent
+            while o:
+                path.append(str(o.id))
+                o = o.parent
+            self.path = '.'.join(path)
         return super(Node, self).save(*args, **kwargs)
 
 
@@ -43,23 +51,30 @@ class Resource(Document):
         'allow_inheritance': True
     }
 
-    record_type = fields.StringField(max_length=15, default=Resource.get_type)
+    kind = fields.StringField(max_length=15)
     #timestamp
     created = fields.DateTimeField()
     #timestamp
-    updated = fields.DateTimeField(default=datetime.datetime.now)
+    updated = fields.DateTimeField(default=datetime.datetime.utcnow())
     # Parent record. Mongo object id. We don't have resource parents
-    parent = fields.ReferenceField('Node', reverse_delete_rule=CASCADE)
+    parent = fields.ReferenceField('Node', reverse_delete_rule=CASCADE,
+                                   required=True)
     # Some name can be used to determine an object.
-    tag = fields.StringField(default=Resource.get_tag)
+    tag = fields.StringField()
 
-    @classmethod
-    def get_type(self):
+    def get_kind(self):
         return 'resource'
 
-    @classmethod
     def get_tag(self):
         return 'resource'
+
+    def save(self, *args, **kwargs):
+        if not self.created:
+            self.created = datetime.datetime.utcnow()
+        self.kind = self.get_kind()
+        self.tag = self.tag if self.tag else self.get_tag()
+
+        return super(Resource, self).save(*args, **kwargs)
 
 
 #Used for geospacial requests
@@ -68,11 +83,9 @@ class GeoResource(Resource):
     def resolve_to_geo(self, address):
         pass
 
-    @classmethod
-    def get_type(self):
+    def get_kind(self):
         return 'geo_location'
 
-    @classmethod
     def get_tag(self):
         return 'geo_location'
 
@@ -84,11 +97,9 @@ class SearchVector(Resource):
         """Returns normal of a vector to optimize searching."""
         pass
 
-    @classmethod
-    def get_type(self):
+    def get_kind(self):
         return 'vector'
 
-    @classmethod
     def get_tag(self):
         return 'vector'
 

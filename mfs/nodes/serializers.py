@@ -1,6 +1,5 @@
-from rest_framework import serializers
-from mfs.common import constants as co
 from mfs.nodes.models import Node
+from mfs.common.serializers import MongoEngineModelSerializer
 
 """
 The basic idea is that we have nodes and their resources.
@@ -17,9 +16,9 @@ serializer for data.
 """
 
 
-class NodeSerializer(serializers.ModelSerializer):
+class NodeSerializer(MongoEngineModelSerializer):
     class Meta:
         model = Node
-        fields = ('id', 'uid', 'gid', 'perm', 'path', 'record_type',
+        fields = ('id', 'uid', 'perm',
                   'created', 'updated', 'parent', 'shared',
                   'access_level')

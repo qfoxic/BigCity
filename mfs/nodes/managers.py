@@ -10,14 +10,15 @@ class NodesManager(clib.BaseManager):
         queryset = self.serializer.Meta.model.objects.all()
         return clib.jsonresult(self.serializer(queryset, many=True).data)
 
-    def add(self, uid, gid):
-        data = {'uid': uid, 'gid': gid}
+    def add(self, uid, access_levels):
+        data = {'uid': uid,
+                'access_level': access_levels}
         data.update(self.request.DATA)
         s = self.serializer(data=data)
         if s.is_valid():
             s.save()
             return clib.jsonresult(s.data)
-        return clib.jsonerror(''.join([','.join(e) for e in s.errors.values()]))
+        return clib.jsonerror(s.errors)
 
     def rm(self, nid):
         pass
@@ -27,7 +28,7 @@ class NodesManager(clib.BaseManager):
         #res['object'].delete()
         #return clib.jsonsuccess('Object id:<%s> has been removed' % (pk,))
 
-    def update(self, nid):
+    def upd(self, nid):
         pass
         #usr_srl_class = _get_user_serializer(request)
         #res = clib.get_obj(usr_srl_class, pk)

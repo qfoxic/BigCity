@@ -37,10 +37,26 @@ class NodesViewSet(vws.BaseViewSet):
         return Response(data=res)
 
     def retrieve(self, request, pk=None):
+        uid = self.request.user.pk
+        um = usr.UsersManager(request)
+        user = um.data(uid)
+        node = self.manager.data(pk)
+        if not clib.check_perm(node['result'], user['result'], co.READ):
+            return Response(
+                data=clib.jsonerror('You do not have read permissions'),
+                status=status.HTTP_403_FORBIDDEN)
         return Response(data=self.manager.data(pk))
 
     def update(self, request, pk=None):
-        res = self.manager.update(pk)
+        uid = self.request.user.pk
+        um = usr.UsersManager(request)
+        user = um.data(uid)
+        node = self.manager.data(pk)
+        if not clib.check_perm(node['result'], user['result'], co.WRITE):
+            return Response(
+                data=clib.jsonerror('You do not have write permissions'),
+                status=status.HTTP_403_FORBIDDEN)
+        res = self.manager.upd(pk)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=res)

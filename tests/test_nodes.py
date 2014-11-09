@@ -89,6 +89,8 @@ class NodeTests(APITestCase):
         node = {'uid': uid, 'perm': '666'}
         response = self.client.post('/node/', node, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        nid = response.data['result']['id']
         node = {'perm': '777'}
-        response = self.client.put('/node/', node, format='json')
+        response = self.client.put('/node/{}/'.format(nid),
+                                   node, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

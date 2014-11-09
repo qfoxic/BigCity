@@ -21,33 +21,30 @@ class NodesManager(clib.BaseManager):
         return clib.jsonerror(s.errors)
 
     def rm(self, nid):
-        pass
-        #res = clib.get_obj(_get_user_serializer(request), pk)
-        #if res.get('error'):
-        #    return clib.jsonerror(res['error'])
-        #res['object'].delete()
-        #return clib.jsonsuccess('Object id:<%s> has been removed' % (pk,))
+        res = clib.get_obj(self.serializer, nid)
+        if res.get('error'):
+            return clib.jsonerror(res['error'])
+        res['object'].delete()
+        return clib.jsonsuccess('Object id:<%s> has been removed' % (nid,))
 
     def upd(self, nid):
-        pass
-        #usr_srl_class = _get_user_serializer(request)
-        #res = clib.get_obj(usr_srl_class, pk)
-        #if res.get('error'):
-        #    return clib.jsonerror(res['error'])
-        #srl = usr_srl_class(res['object'], data=request.DATA, partial=True)
-        #if srl.is_valid():
-        #    srl.save()
-        #    return clib.jsonresult(srl.data)
-        #return clib.jsonerror(''.join([','.join([k + '-' + ''.join(v)]) for k, v in srl.errors.items()]))
+        res = clib.get_obj(self.serializer, nid)
+        if res.get('error'):
+            return clib.jsonerror(res['error'])
+        srl = self.serializer(res['object'],
+                              data=self.request.DATA,
+                              partial=True)
+        if srl.is_valid():
+            srl.save()
+            return clib.jsonresult(srl.data)
+        return clib.jsonerror(''.join([','.join([k + '-' + ''.join(v)]) for k, v in srl.errors.items()]))
 
     def data(self, nid):
-        pass
-        #usr_srl_class = _get_user_serializer(request)
-        #res = clib.get_obj(usr_srl_class, pk)
-        #if res.get('error'):
-        #    return clib.jsonerror(res['error'])
-        #srl = usr_srl_class(res['object'])
-        #return clib.jsonresult(srl.data)
+        res = clib.get_obj(self.serializer, nid)
+        if res.get('error'):
+            return clib.jsonerror(res['error'])
+        srl = self.serializer(res['object'])
+        return clib.jsonresult(srl.data)
 
     #def chown(request, uid, gid):
     #    pass

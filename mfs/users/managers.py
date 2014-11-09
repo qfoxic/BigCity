@@ -53,6 +53,8 @@ class UsersManager(clib.BaseManager):
         if res.get('error'):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'])
+        gids = self.groups(res['object'].pk)
+        srl.data['groups'] = gids['result']
         return clib.jsonresult(srl.data)
 
     def chpasswd(self, pk):

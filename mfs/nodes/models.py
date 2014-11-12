@@ -11,7 +11,7 @@ class Node(Document):
     uid = fields.IntField(required=True, min_value=1)
     #unix permission.
     perm = fields.StringField(default='666')
-    # comma separated path of entity's ids.
+    # dot separated path of entity's ids.
     path = fields.StringField(max_length=3000)
     kind = fields.StringField(max_length=15)
     #timestamp
@@ -36,11 +36,11 @@ class Node(Document):
 
         path = self.path.split('.') if self.path else []
         cid = str(self.id)
-        if not cid in path:
-            path.append(cid)
+        if cid not in path:
+            path.insert(0, cid)
             o = self.parent
             while o:
-                path.append(str(o.id))
+                path.insert(0, str(o.id))
                 o = o.parent
             self.path = '.'.join(path)
         return super(Node, self).save(*args, **kwargs)

@@ -53,8 +53,9 @@ class GroupSuperUserTests(APITestCase):
         response = self.client.post('/group/', data1, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.get('/group/', format='json')
-        self.assertEqual(response.data, [{'id': 1, 'name': u'test'},
-                                         {'id': 2, 'name': u'test1'}])
+        self.assertEqual(response.data['result'],
+                         [{'id': 1, 'name': u'test'},
+                          {'id': 2, 'name': u'test1'}])
 
 
 

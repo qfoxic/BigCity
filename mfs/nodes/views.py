@@ -9,6 +9,7 @@ import mfs.common.views as vws
 import mfs.common.lib as clib
 import mfs.common.constants as co
 
+#TODO. Add change group functionality.
 
 class NodesViewSet(vws.BaseViewSet):
     permission_classes = [permissions.IsAuthenticated]

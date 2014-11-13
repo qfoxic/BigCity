@@ -22,26 +22,27 @@ class NodeTests(APITestCase):
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/register/', data, format='json')
-        data = response.data['result']
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.post('/login/', {'username': username,
-                                                'password': '1234567890'},
-                                    format='json')
-        return data
+        uid = response.data['result']['id']
+        self.client.post('/login/', {'username': username,
+                                     'password': '1234567890'},
+                         format='json')
+        return uid
 
-    def _createTree(self, username, group, createGroup=True):
-        uid = self._createAndLoginUser(username)['id']
-        data = {'name': group}
-        if createGroup:
-            response = self.client.post('/group/', data, format='json')
+    def _createAndAddGroup(self, groupname, uid, add=True):
+        if add:
+            grp_data = {'name': groupname}
+            response = self.client.post('/group/', grp_data, format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             gid = response.data['result']['id']
         else:
-            response = self.client.get('/group/', format='json')
+            response = self.client.get('/group/', grp_data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
             gid = response.data['result'][0]['id']
         response = self.client.post('/user/{}/addgroup/'.format(uid),
                                     {'gid': gid}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def _createTree(self, uid):
         node = {'uid': uid, 'perm': '666'}
         response = self.client.post('/node/', node, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -54,7 +55,7 @@ class NodeTests(APITestCase):
         response = self.client.post('/node/', node, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         pid3 = response.data['result']['id']
-        return gid, uid, pid, pid2, pid3
+        return pid, pid2, pid3
 
     #NODE REMOVAL with parent.
     # Update node.
@@ -63,7 +64,9 @@ class NodeTests(APITestCase):
     # List access to nodes. - group perms.
     # Test sharing.
     def test_node_data(self):
-        gid, uid, pid1, pid2, pid3 = self._createTree('user', 'test')
+        uid = self._createAndLoginUser('user')
+        gid = self._createAndAddGroup('test', uid)
+        pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data['result']
@@ -87,7 +90,9 @@ class NodeTests(APITestCase):
         self.assertEqual(pid2, data['parent'])
 
     def test_node_path(self):
-        _, _, pid1, pid2, pid3 = self._createTree('user', 'test')
+        uid = self._createAndLoginUser('user')
+        self._createAndAddGroup('test', uid)
+        pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data['result']
@@ -102,7 +107,9 @@ class NodeTests(APITestCase):
         self.assertEqual('{}.{}.{}'.format(pid1, pid2, pid3), data['path'])
 
     def test_update_node(self):
-        _, _, pid1, _, _ = self._createTree('user', 'test')
+        uid = self._createAndLoginUser('user')
+        self._createAndAddGroup('test', uid)
+        pid1, _, _ = self._createTree(uid, 'test')
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.put('/node/{}/'.format(pid1), {'perm': '777'},
@@ -113,7 +120,9 @@ class NodeTests(APITestCase):
         self.assertEqual(response.data['result']['perm'], '777')
 
     def test_owner_read_perm(self):
-        _, _, pid1, _, _ = self._createTree('user', 'test')
+        uid = self._createAndLoginUser('user')
+        self._createAndAddGroup('test', uid)
+        pid1, _, _ = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.put('/node/{}/'.format(pid1), {'perm': '222'},
@@ -122,16 +131,35 @@ class NodeTests(APITestCase):
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_group_read_perm(self):
-        _, _, pid1, _, _ = self._createTree('user', 'test')
+    def test_same_group_read_perm(self):
+        uid = self._createAndLoginUser('user')
+        self._createAndAddGroup('test', uid)
+        pid1, _, _ = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.put('/node/{}/'.format(pid1), {'perm': '222'},
                                    format='json')
-        _, _, pid1, _, _ = self._createTree('user1', 'test', False)
+        self.client.get('/logout/')
+        uid2 = self._createAndLoginUser('user1')
+        self._createAndAddGroup('test', uid)
+        _, _, pid1, _, _ = self._createTree(uid2, 'test', False)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_diff_group_read_perm(self):
+        uid = self._createAndLoginUser('user')['id']
+        _, _, pid1, _, _ = self._createTree(uid, 'test')
+        response = self.client.get('/node/{}/'.format(pid1), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.put('/node/{}/'.format(pid1), {'perm': '222'},
+                                   format='json')
+        self.client.get('/logout/')
+        uid2 = self._createAndLoginUser('user1')['id']
+        _, _, pid1, _, _ = self._createTree(uid2, 'test', False)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get('/node/{}/'.format(pid1), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 

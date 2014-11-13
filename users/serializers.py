@@ -6,7 +6,6 @@ from mfs.users.managers import UsersManager
 from mfs.users.models import MongoUser
 
 
-#TODO. Investiage possibility to save into mongo using field.
 class OneToOneMongoProxyField(serializers.CharField):
     def __init__(self, mongo_model, *args, **kwargs):
         super(OneToOneMongoProxyField, self).__init__(*args, **kwargs)

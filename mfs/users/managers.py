@@ -35,6 +35,7 @@ class UsersManager(clib.BaseManager):
         res = clib.get_obj(self.serializer, pk)
         if res.get('error'):
             return clib.jsonerror(res['error'])
+        # TODO. Remove data from mongo.
         res['object'].delete()
         return clib.jsonsuccess('Object id:<%s> has been removed' % (pk,))
 

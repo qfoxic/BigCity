@@ -8,7 +8,7 @@ import mfs.groups.managers as grp
 import mfs.common.views as vws
 
 
-#TODO Add reset password.
+#TODO Add reset password with emails.
 class UserViewSet(vws.BaseViewSet):
     permission_classes = [permissions.IsAuthenticated]
     manager_class = usr.UsersManager

@@ -9,8 +9,8 @@ import mfs.common.views as vws
 import mfs.common.lib as clib
 import mfs.common.constants as co
 
-#TODO. Add change group functionality.
 
+# TODO. Add change group functionality.
 class NodesViewSet(vws.BaseViewSet):
     permission_classes = [permissions.IsAuthenticated]
     manager_class = nds.NodesManager
@@ -64,4 +64,12 @@ class NodesViewSet(vws.BaseViewSet):
         return Response(data=res)
 
     def destroy(self, request, pk=None):
+        uid = self.request.user.pk
+        um = usr.UsersManager(request)
+        user = um.data(uid)
+        node = self.manager.data(pk)
+        if not clib.check_perm(node['result'], user['result'], co.WRITE):
+            return Response(
+                data=clib.jsonerror('You do not have write permissions'),
+                status=status.HTTP_403_FORBIDDEN)
         return Response(data=self.manager.rm(pk))

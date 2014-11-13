@@ -28,6 +28,10 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data['resume'], 'super_file')
         self.assertEqual(data['email'], 'wwww@www.www')
+        self.client.login(username='teste', password='qwerty')
+        response = self.client.delete('/user/{}/'.format(user_id),
+                                      format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_incorrect_add_user(self):
         data = {'username': 'test', 'email': 'wwwwww',
@@ -55,6 +59,10 @@ class UserTests(APITestCase):
         self.assertEqual(data['resume'], 'test2')
         self.assertEqual(data['email'], 'ww1@www.www')
         self.assertEqual(data['first_name'], 'tets')
+        self.client.login(username='teste', password='qwerty')
+        response = self.client.delete('/user/{}/'.format(user_id),
+                                      format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_incorrect_update_user(self):
         data = {'username': 'test', 'email': 'wwww@www.www',
@@ -66,6 +74,10 @@ class UserTests(APITestCase):
         data = {'email': 'ww1www.www', 'resume': 'test2', 'id': user_id}
         response = self.client.put('/user/{}/'.format(user_id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.client.login(username='teste', password='qwerty')
+        response = self.client.delete('/user/{}/'.format(user_id),
+                                      format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_existing_add_group(self):
         data = {'name': 'test'}
@@ -85,6 +97,10 @@ class UserTests(APITestCase):
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertAlmostEqual(response.data['result'][0][0], gid)
+        self.client.login(username='teste', password='qwerty')
+        response = self.client.delete('/user/{}/'.format(user_id),
+                                      format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_inexisted_add_group(self):
         gid = 123
@@ -97,6 +113,10 @@ class UserTests(APITestCase):
         response = self.client.post('/user/{}/addgroup/'.format(user_id),
                                     {'gid': gid}, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.client.login(username='teste', password='qwerty')
+        response = self.client.delete('/user/{}/'.format(user_id),
+                                      format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_rm_group(self):
         data = {'name': 'test'}
@@ -123,6 +143,10 @@ class UserTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(list(response.data['result']), [])
+        self.client.login(username='teste', password='qwerty')
+        response = self.client.delete('/user/{}/'.format(user_id),
+                                      format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_login(self):
         self.client.get('/logout/')
@@ -167,5 +191,19 @@ class UserTests(APITestCase):
                                                 'password': 'qwerty'},
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.login(username='teste', password='qwerty')
+        response = self.client.delete('/user/{}/'.format(user_id),
+                                      format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_rm_user(self):
+        data = {'username': 'test', 'email': 'wwww@www.www',
+                'first_name': 'tets', 'last_name': 'tetete',
+                'resume': 'super_file', 'password': '1234567890'}
+        response = self.client.post('/user/register/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user_id = response.data['result']['id']
+        response = self.client.delete('/user/{}/'.format(user_id),
+                                      format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 

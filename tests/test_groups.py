@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.test import APIClient
 
+
 class GroupSuperUserTests(APITestCase):
 
     def setUp(self):

@@ -1,7 +1,6 @@
 import mfs.common.lib as clib
 from mfs.nodes.serializers import NodeSerializer
 
-#TODO. Create init super user and some init group.
 
 class NodesManager(clib.BaseManager):
     serializer = NodeSerializer

@@ -32,14 +32,16 @@ def get_obj(serializer, pk):
 
 
 def check_perm(node, user, perm_to_check):
-    #TODO. FINISH that. and then update operation.
-    perm, uid= node['perm'], user['id']
+    perm, uid = node['perm'], user['id']
+    if uid == 1:
+        return True
+
     owner, group, other = int(perm[0]), int(perm[1]), int(perm[2])
     user_gids = [i[0] for i in user['groups']]
     # Check owner permissions.
     if uid == node['uid']:
         return bool(owner & perm_to_check)
-    #If user is in at least one group the node is assigned to.
+    # If user is in at least one group the node is assigned to.
     elif set(user_gids).intersection(node['access_level']):
         return bool(group & perm_to_check)
     else:

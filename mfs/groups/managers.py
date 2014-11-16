@@ -7,7 +7,7 @@ class GroupManager(clib.BaseManager):
 
     def ls(self):
         queryset = self.serializer.Meta.model.objects.all()
-        return self.serializer(queryset, many=True).data
+        return clib.jsonresult(self.serializer(queryset, many=True).data)
 
     def add(self):
         srl = self.serializer(data=self.request.DATA)

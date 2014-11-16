@@ -18,7 +18,9 @@ serializer for data.
 
 class NodeSerializer(MongoEngineModelSerializer):
     class Meta:
+        depth = 1
         model = Node
         fields = ('id', 'uid', 'perm',
                   'created', 'updated', 'parent', 'shared',
-                  'access_level')
+                  'access_level', 'path')
+        read_only_fields = ('path',)

@@ -1,5 +1,4 @@
 from rest_framework import permissions
-from rest_framework.decorators import link
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -14,14 +13,6 @@ import mfs.common.constants as co
 class NodesViewSet(vws.BaseViewSet):
     permission_classes = [permissions.IsAuthenticated]
     manager_class = nds.NodesManager
-
-    @link()
-    def show(self, request, pk=None):
-        """List all nodes under a parent.
-        If parent wasn't specified then list top level nodes.
-        pk == parent id.
-        """
-        return Response(data=self.manager.ls(pk))
 
     def create(self, request):
         uid = self.request.user.pk

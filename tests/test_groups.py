@@ -1,7 +1,4 @@
-from django.contrib.auth.models import User
-from django.test.utils import setup_test_environment
-setup_test_environment()
-
+from users.models import Users
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -11,7 +8,7 @@ from rest_framework.test import APIClient
 class GroupSuperUserTests(APITestCase):
 
     def setUp(self):
-        User.objects.create_superuser('teste', 'wwwbnv@uke.nee', 'qwerty')
+        Users.objects.create_superuser('teste', 'wwwbnv@uke.nee', 'qwerty')
         self.client = APIClient()
         self.client.login(username='teste', password='qwerty')
 

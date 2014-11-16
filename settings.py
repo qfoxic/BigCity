@@ -53,7 +53,7 @@ ROOT_URLCONF = 'urls'
 
 WSGI_APPLICATION = 'wsgi.application'
 
-
+AUTH_USER_MODEL = 'users.Users'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 

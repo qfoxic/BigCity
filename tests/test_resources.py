@@ -168,13 +168,81 @@ class ResourceTests(APITestCase):
         pid1, pid2 = self._createTree(uid)
         response = self.client.post('/resource/',
                                     {'parent': pid1}, format='json')
-        res_id = response.data['result']['id']
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.put('/node/{}/'.format(pid1), {'perm': '222'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.get('/resource/{}/'.format(res_id),
+        response = self.client.get('/node/{}/reso_by_tag/'.format(pid1),
+                                   {'tag': 'resource'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self._removeNodes(pid1, pid2)
 
+    def test_update_reso_perms_allow(self):
+        uid = self._createAndLoginUser('user')
+        self._createAndAddGroup('test', uid)
+        pid1, pid2 = self._createTree(uid)
+        response = self.client.post('/resource/',
+                                    {'parent': pid1},
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reso_id = response.data['result']['id']
+        response = self.client.put('/resource/{}/'.format(reso_id),
+                                   {'tag': 'reso'},
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['result']['tag'], 'reso')
+        self._removeNodes(pid1, pid2)
+
+    def test_update_reso_perms_deny(self):
+        uid = self._createAndLoginUser('user')
+        self._createAndAddGroup('test', uid)
+        pid1, pid2 = self._createTree(uid)
+        response = self.client.post('/resource/',
+                                    {'parent': pid1},
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reso_id = response.data['result']['id']
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.put('/node/{}/'.format(pid1),
+                                   {'perm': '444'},
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.put('/resource/{}/'.format(reso_id),
+                                   {'tag': 'reso'},
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self._removeNodes(pid1, pid2)
+
+    def test_rm_reso_perms_allow(self):
+        uid = self._createAndLoginUser('user')
+        self._createAndAddGroup('test', uid)
+        pid1, pid2 = self._createTree(uid)
+        response = self.client.post('/resource/',
+                                    {'parent': pid1},
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reso_id = response.data['result']['id']
+        response = self.client.delete('/resource/{}/'.format(reso_id),
+                                      format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self._removeNodes(pid1, pid2)
+
+    def test_rm_reso_perms_deny(self):
+        uid = self._createAndLoginUser('user')
+        self._createAndAddGroup('test', uid)
+        pid1, pid2 = self._createTree(uid)
+        response = self.client.post('/resource/',
+                                    {'parent': pid1},
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reso_id = response.data['result']['id']
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.put('/node/{}/'.format(pid1),
+                                   {'perm': '444'},
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.delete('/resource/{}/'.format(reso_id),
+                                      format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self._removeNodes(pid1, pid2)

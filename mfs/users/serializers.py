@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User, make_password
+from django.contrib.auth.models import make_password
 from django.contrib.auth import get_user_model
 
 

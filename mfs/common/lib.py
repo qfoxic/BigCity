@@ -26,7 +26,7 @@ def jsonresult(item):
 def get_obj(serializer, pk):
     try:
         instance = serializer.Meta.model.objects.get(pk=pk)
-    except (ObjectDoesNotExist, ValueError):
+    except (ObjectDoesNotExist, ValueError, serializer.Meta.model.DoesNotExist):
         raise Http404
     return {'object': instance}
 

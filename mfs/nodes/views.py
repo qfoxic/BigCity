@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from rest_framework.response import Response
+from rest_framework.decorators import link
 from rest_framework import status
 
 import mfs.nodes.managers as nds
@@ -65,10 +66,21 @@ class NodesViewSet(vws.BaseViewSet):
                 status=status.HTTP_403_FORBIDDEN)
         return Response(data=self.manager.rm(pk))
 
+    @link()
+    def reso_by_tag(self, request, pk=None):
+        uid = request.user.pk
+        tag = request.GET.get('tag')
+        um = usr.UsersManager(request)
+        user = um.data(uid)
+        node = self.manager.data(pk)
+        rm = nds.ResourcesManager(request)
+        if not clib.check_perm(node['result'], user['result'], co.READ):
+            return Response(
+                data=clib.jsonerror('You do not have read permissions'),
+                status=status.HTTP_403_FORBIDDEN)
+        return Response(data=rm.data(parent=node['result']['id'], tag=tag))
 
-# Parent node exists
-# Parent node doesn't exists.
-# Check read permissions on parent node.
+
 class ResourcesViewSet(vws.BaseViewSet):
     permission_classes = [permissions.IsAuthenticated,]
     manager_class = nds.ResourcesManager
@@ -92,16 +104,17 @@ class ResourcesViewSet(vws.BaseViewSet):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=res)
 
-#    def retrieve(self, request, pk=None):
-#        uid = self.request.user.pk
-#        um = usr.UsersManager(request)
-#        user = um.data(uid)
-#        node = self.manager.data(pk)
-#        if not clib.check_perm(node['result'], user['result'], co.READ):
-#            return Response(
-#                data=clib.jsonerror('You do not have read permissions'),
-#                status=status.HTTP_403_FORBIDDEN)
-#        return Response(data=self.manager.data(pk))
+    def retrieve(self, request, pk=None):
+        uid = self.request.user.pk
+        um = usr.UsersManager(request)
+        user = um.data(uid)
+        resource = self.manager.data(pk=pk)
+        if not clib.check_perm(resource['result']['parent'],
+                               user['result'], co.READ):
+            return Response(
+                data=clib.jsonerror('You do not have read permissions'),
+                status=status.HTTP_403_FORBIDDEN)
+        return Response(data=resource)
 
 #    def update(self, request, pk=None):
 #        uid = self.request.user.pk

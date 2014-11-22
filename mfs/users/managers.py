@@ -32,14 +32,14 @@ class UsersManager(clib.BaseManager):
         return clib.jsonerror(''.join([','.join(e) for e in s.errors.values()]))
 
     def rm(self, pk):
-        res = clib.get_obj(self.serializer, pk)
+        res = clib.get_obj(self.serializer, **{'pk': pk})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         res['object'].delete()
         return clib.jsonsuccess('Object id:<%s> has been removed' % (pk,))
 
     def upd(self, pk):
-        res = clib.get_obj(self.serializer, pk)
+        res = clib.get_obj(self.serializer, **{'pk': pk})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'], data=self.request.DATA, partial=True)
@@ -49,7 +49,7 @@ class UsersManager(clib.BaseManager):
         return clib.jsonerror(''.join([','.join([k + '-' + ''.join(v)]) for k, v in srl.errors.items()]))
 
     def data(self, pk):
-        res = clib.get_obj(self.serializer, pk)
+        res = clib.get_obj(self.serializer, **{'pk': pk})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'])
@@ -58,7 +58,7 @@ class UsersManager(clib.BaseManager):
         return clib.jsonresult(srl.data)
 
     def chpasswd(self, pk):
-        res = clib.get_obj(self.serializer, pk)
+        res = clib.get_obj(self.serializer, **{'pk': pk})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         user = res['object']

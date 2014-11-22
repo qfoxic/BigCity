@@ -17,14 +17,14 @@ class GroupManager(clib.BaseManager):
         return clib.jsonerror(''.join([','.join(e) for e in srl.errors.values()]))
 
     def rm(self, pk):
-        res = clib.get_obj(self.serializer, pk)
+        res = clib.get_obj(self.serializer, **{'pk': pk})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         res['object'].delete()
         return clib.jsonsuccess('Object id:<%s> has been removed' % (pk,))
 
     def upd(self, pk):
-        res = clib.get_obj(self.serializer, pk)
+        res = clib.get_obj(self.serializer, **{'pk': pk})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'], data=self.request.DATA)
@@ -34,7 +34,7 @@ class GroupManager(clib.BaseManager):
         return clib.jsonerror(''.join([','.join(e) for e in srl.errors.values()]))
 
     def data(self, pk):
-        res = clib.get_obj(self.serializer, pk)
+        res = clib.get_obj(self.serializer, **{'pk': pk})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'])

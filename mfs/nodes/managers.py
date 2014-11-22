@@ -21,14 +21,14 @@ class NodesManager(clib.BaseManager):
         return clib.jsonerror(s.errors)
 
     def rm(self, nid):
-        res = clib.get_obj(self.serializer, nid)
+        res = clib.get_obj(self.serializer, **{'pk': nid})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         res['object'].delete()
         return clib.jsonsuccess('Object id:<%s> has been removed' % (nid,))
 
     def upd(self, nid):
-        res = clib.get_obj(self.serializer, nid)
+        res = clib.get_obj(self.serializer, **{'pk': nid})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'],
@@ -40,7 +40,7 @@ class NodesManager(clib.BaseManager):
         return clib.jsonerror(''.join([','.join([k + '-' + ''.join(v)]) for k, v in srl.errors.items()]))
 
     def data(self, nid):
-        res = clib.get_obj(self.serializer, nid)
+        res = clib.get_obj(self.serializer, **{'pk': nid})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'])
@@ -62,14 +62,14 @@ class ResourcesManager(clib.BaseManager):
         return clib.jsonerror(s.errors)
 
     def rm(self, nid):
-        res = clib.get_obj(self.serializer, nid)
+        res = clib.get_obj(self.serializer, **{'pk': nid})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         res['object'].delete()
         return clib.jsonsuccess('Object id:<%s> has been removed' % (nid,))
 
     def upd(self, nid):
-        res = clib.get_obj(self.serializer, nid)
+        res = clib.get_obj(self.serializer, **{'pk': nid})
         if res.get('error'):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'],
@@ -80,8 +80,8 @@ class ResourcesManager(clib.BaseManager):
             return clib.jsonresult(srl.data)
         return clib.jsonerror(''.join([','.join([k + '-' + ''.join(v)]) for k, v in srl.errors.items()]))
 
-    def data(self, nid):
-        res = clib.get_obj(self.serializer, nid)
+    def data(self, **kwargs):
+        res = clib.get_obj(self.serializer, **kwargs)
         if res.get('error'):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'])

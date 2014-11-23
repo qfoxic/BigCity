@@ -90,7 +90,9 @@ class GeoResource(Resource):
         'indexes': [("location", "2dsphere"),]
     }
 
+
 #Used for similarity search.
+#TODO. Create similarity calc formula and index.
 class SearchVector(Resource):
 
     def normalize(self, data):

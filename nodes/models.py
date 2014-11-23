@@ -1,6 +1,6 @@
 from mongoengine import fields
-
 from mfs.nodes.models import Node
+
 
 class Category(Node):
     title = fields.StringField(required=True, max_length=3000)

@@ -1,5 +1,11 @@
+import urllib2
+import json
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
+
+import mfs.common.constants as co
+
 
 
 class BaseManager(object):
@@ -47,3 +53,13 @@ def check_perm(node, user, perm_to_check):
     else:
         return bool(other & perm_to_check)
     return False
+
+
+def address_to_geo(*args):
+    resp = urllib2.urlopen(co.GOOGLE_MAPS.format(','.join(args))).read()
+    try:
+        converted = json.loads(resp)
+    except TypeError:
+        return 0.0, 0.0
+    loc = converted['results'][0]['geometry']['location']
+    return loc['lat'], loc['lng']

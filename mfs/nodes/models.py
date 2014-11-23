@@ -2,6 +2,8 @@ import datetime
 
 from mongoengine import Document, fields, NULLIFY, CASCADE
 
+from mfs.common.lib import address_to_geo
+
 
 class Node(Document):
     meta = {
@@ -26,7 +28,7 @@ class Node(Document):
     access_level = fields.ListField()
 
     def get_kind(self):
-        return 'node'
+        return self.__class__.__name__.lower()
 
     def save(self, *args, **kwargs):
         if not self.created:
@@ -52,9 +54,9 @@ class Resource(Document):
     }
 
     kind = fields.StringField(max_length=15)
-    #timestamp
+    # timestamp.
     created = fields.DateTimeField()
-    #timestamp
+    # timestamp.
     updated = fields.DateTimeField(default=datetime.datetime.utcnow())
     # Parent record. Mongo object id. We don't have resource parents
     parent = fields.ReferenceField('Node', reverse_delete_rule=CASCADE,
@@ -63,10 +65,10 @@ class Resource(Document):
     tag = fields.StringField()
 
     def get_kind(self):
-        return 'resource'
+        return self.__class__.__name__.lower()
 
     def get_tag(self):
-        return 'resource'
+        return self.get_kind()
 
     def save(self, *args, **kwargs):
         if not self.created:
@@ -79,16 +81,14 @@ class Resource(Document):
 
 #Used for geospacial requests
 class GeoResource(Resource):
+    geo_location = fields.GeoPointField()
 
-    def resolve_to_geo(self, address):
-        pass
+    def resolve_to_geo(self, *args):
+        self.geo_location = address_to_geo(*args)
 
-    def get_kind(self):
-        return 'geo_location'
-
-    def get_tag(self):
-        return 'geo_location'
-
+    meta = {
+        'indexes': [("location", "2dsphere"),]
+    }
 
 #Used for similarity search.
 class SearchVector(Resource):
@@ -96,10 +96,4 @@ class SearchVector(Resource):
     def normalize(self, data):
         """Returns normal of a vector to optimize searching."""
         pass
-
-    def get_kind(self):
-        return 'vector'
-
-    def get_tag(self):
-        return 'vector'
 

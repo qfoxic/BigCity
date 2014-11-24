@@ -33,7 +33,7 @@ class PropertiesResource(SearchVector):
     wall_type = fields.IntField(choices=WALL_TYPES,
                                 required=True, default=WALL_TYPES[0][0])
     build_type = fields.IntField(choices=WALL_TYPES,
-                                required=True, default=BUILD_TYPES[0][0])
+                                 required=True, default=BUILD_TYPES[0][0])
 
 
 class PriceResource(Resource):

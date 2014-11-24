@@ -87,7 +87,7 @@ class GeoResource(Resource):
         self.geo_location = address_to_geo(*args)
 
     meta = {
-        'indexes': [("location", "2dsphere"),]
+        'indexes': [("geo_location", "2dsphere"),]
     }
 
 

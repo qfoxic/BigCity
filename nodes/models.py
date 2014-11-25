@@ -1,6 +1,6 @@
 from mongoengine import fields
 from mfs.nodes.models import Node
-from mfs.nodes.models import GeoResource, SearchVector, Resource
+from mfs.nodes.models import GeoResource, Resource
 
 
 WALL_TYPES = ((0, 'Ferroconcrete'), (1, 'Brick'),)
@@ -23,7 +23,7 @@ class AddressResource(GeoResource):
         return super(AddressResource, self).save(*args, **kwargs)
 
 
-class PropertiesResource(SearchVector):
+class PropertiesResource(Resource):
     rooms = fields.IntField(required=True, default=0)
     square_gen = fields.IntField(required=True, default=0)
     square_live = fields.IntField(required=True, default=0)

@@ -17,10 +17,10 @@ class UserViewSet(vws.BaseViewSet):
         return Response(data=self.manager.ls())
 
     def retrieve(self, request, pk=None):
-        return Response(data=self.manager.data(pk))
+        return Response(data=self.manager.data(pk=pk))
 
     def update(self, request, pk=None):
-        res = self.manager.upd(pk)
+        res = self.manager.upd(pk=pk)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=res)
@@ -36,10 +36,10 @@ class UserViewSet(vws.BaseViewSet):
     def addgroup(self, request, pk=None):
         gid = request.DATA.get('gid')
         group_manager = grp.GroupManager(request)
-        res = group_manager.data(gid)
+        res = group_manager.data(pk=gid)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
-        res = self.manager.data(pk)
+        res = self.manager.data(pk=pk)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=self.manager.add_group(pk, gid))
@@ -48,10 +48,10 @@ class UserViewSet(vws.BaseViewSet):
     def rmgroup(self, request, pk=None):
         gid = request.DATA.get('gid')
         group_manager = grp.GroupManager(request)
-        res = group_manager.data(gid)
+        res = group_manager.data(pk=gid)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
-        res = self.manager.data(pk)
+        res = self.manager.data(pk=pk)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=self.manager.rm_group(pk, gid))

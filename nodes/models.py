@@ -7,10 +7,12 @@ WALL_TYPES = ((0, 'Ferroconcrete'), (1, 'Brick'),)
 BUILD_TYPES = ((0, 'New'), (1, 'Secondary'),)
 
 
+# Nodes.
 class Category(Node):
     title = fields.StringField(required=True, max_length=3000)
 
 
+# Resources.
 class AddressResource(GeoResource):
     country = fields.StringField(max_length=30)
     region = fields.StringField(max_length=30)
@@ -23,7 +25,7 @@ class AddressResource(GeoResource):
         return super(AddressResource, self).save(*args, **kwargs)
 
 
-class PropertiesResource(Resource):
+class BuildingPropertiesResource(Resource):
     rooms = fields.IntField(required=True, default=0)
     square_gen = fields.IntField(required=True, default=0)
     square_live = fields.IntField(required=True, default=0)
@@ -44,7 +46,7 @@ class PriceResource(Resource):
 
 
 class PosterResource(Resource):
-    name = fields.StringField(max_length=500)
+    title = fields.StringField(max_length=500)
     text = fields.StringField(max_length=5000)
 
 

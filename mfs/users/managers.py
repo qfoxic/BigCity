@@ -20,36 +20,8 @@ class UsersManager(clib.BaseManager):
             return True
         return False
 
-    def ls(self):
-        queryset = self.serializer.Meta.model.objects.all()
-        return clib.jsonresult(self.serializer(queryset, many=True).data)
-
-    def add(self):
-        s = self.serializer(data=self.request.DATA)
-        if s.is_valid():
-            s.save()
-            return clib.jsonresult(s.data)
-        return clib.jsonerror(''.join([','.join(e) for e in s.errors.values()]))
-
-    def rm(self, pk):
-        res = clib.get_obj(self.serializer, **{'pk': pk})
-        if res.get('error'):
-            return clib.jsonerror(res['error'])
-        res['object'].delete()
-        return clib.jsonsuccess('Object id:<%s> has been removed' % (pk,))
-
-    def upd(self, pk):
-        res = clib.get_obj(self.serializer, **{'pk': pk})
-        if res.get('error'):
-            return clib.jsonerror(res['error'])
-        srl = self.serializer(res['object'], data=self.request.DATA, partial=True)
-        if srl.is_valid():
-            srl.save()
-            return clib.jsonresult(srl.data)
-        return clib.jsonerror(''.join([','.join([k + '-' + ''.join(v)]) for k, v in srl.errors.items()]))
-
-    def data(self, pk):
-        res = clib.get_obj(self.serializer, **{'pk': pk})
+    def data(self, **kwargs):
+        res = clib.get_obj(self.serializer, **kwargs)
         if res.get('error'):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'])

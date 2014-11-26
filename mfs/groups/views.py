@@ -21,10 +21,10 @@ class GroupViewSet(BaseViewSet):
         return Response(data=res)
 
     def retrieve(self, request, pk=None):
-        return Response(data=self.manager.data(pk))
+        return Response(data=self.manager.data(pk=pk))
 
     def update(self, request, pk=None):
-        res = self.manager.upd(pk)
+        res = self.manager.upd(pk=pk)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=res)

@@ -79,7 +79,7 @@ class Resource(Document):
         return super(Resource, self).save(*args, **kwargs)
 
 
-#Used for geospacial requests
+# Used for geospacial requests.
 class GeoResource(Resource):
     geo_location = fields.GeoPointField()
 

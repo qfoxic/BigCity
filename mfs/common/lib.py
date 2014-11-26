@@ -7,12 +7,51 @@ from django.http import Http404
 import mfs.common.constants as co
 
 
-
 class BaseManager(object):
     def __init__(self, request, serializer=None):
         self.request = request
         if serializer:
             self.serializer = serializer
+
+    def ls(self):
+        queryset = self.serializer.Meta.model.objects.all()
+        return jsonresult(self.serializer(queryset, many=True).data)
+
+    def data(self, **kwargs):
+        res = get_obj(self.serializer, **kwargs)
+        if res.get('error'):
+            return jsonerror(res['error'])
+        srl = self.serializer(res['object'])
+        return jsonresult(srl.data)
+
+    def rm(self, pk):
+        res = get_obj(self.serializer, **{'pk': pk})
+        if res.get('error'):
+            return jsonerror(res['error'])
+        res['object'].delete()
+        return jsonsuccess('Object id:<%s> has been removed' % (pk,))
+
+    def add(self, **kwargs):
+        data = self.request.DATA
+        if kwargs:
+            data.update(kwargs)
+        s = self.serializer(data=data)
+        if s.is_valid():
+            s.save()
+            return jsonresult(s.data)
+        return jsonerror(s.errors)
+
+    def upd(self, **kwargs):
+        res = get_obj(self.serializer, **kwargs)
+        if res.get('error'):
+            return jsonerror(res['error'])
+        srl = self.serializer(res['object'],
+                              data=self.request.DATA,
+                              partial=True)
+        if srl.is_valid():
+            srl.save()
+            return jsonresult(srl.data)
+        return jsonerror(''.join([','.join([k + '-' + ''.join(v)]) for k, v in srl.errors.items()]))
 
 
 def jsonerror(error, traceback=None):

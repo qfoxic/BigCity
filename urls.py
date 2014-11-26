@@ -7,6 +7,7 @@ from mfs.nodes.views import NodesViewSet, ResourcesViewSet
 from users.views import RegularUserViewSet, RegularUserRegisterView
 from nodes.views import CategoryViewSet
 
+
 drouter = routers.DefaultRouter()
 drouter.register(r'group', GroupViewSet, base_name='group')
 drouter.register(r'user/register', RegularUserRegisterView, base_name='register')

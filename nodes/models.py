@@ -1,6 +1,8 @@
 from mongoengine import fields
 from mfs.nodes.models import Node
-from mfs.nodes.models import GeoResource, Resource
+from mfs.nodes.models import Resource
+
+from mfs.common.lib import address_to_geo
 
 
 WALL_TYPES = ((0, 'Ferroconcrete'), (1, 'Brick'),)
@@ -12,12 +14,24 @@ class Category(Node):
     title = fields.StringField(required=True, max_length=3000)
 
 
+class Advert(Node):
+    title = fields.StringField(required=True, max_length=300)
+
+
 # Resources.
-class AddressResource(GeoResource):
+class AddressResource(Resource):
+    meta = {
+        'indexes': [[("location", "2dsphere"),]]
+    }
+
+    location = fields.GeoPointField()
     country = fields.StringField(max_length=30)
     region = fields.StringField(max_length=30)
     city = fields.StringField(max_length=30)
     street = fields.StringField(max_length=100)
+
+    def resolve_to_geo(self, *args):
+        self.location = address_to_geo(*args)
 
     def save(self, *args, **kwargs):
         self.resolve_to_geo(self.country, self.region,
@@ -34,7 +48,7 @@ class BuildingPropertiesResource(Resource):
     floor = fields.IntField(required=True, default=0)
     wall_type = fields.IntField(choices=WALL_TYPES,
                                 required=True, default=WALL_TYPES[0][0])
-    build_type = fields.IntField(choices=WALL_TYPES,
+    build_type = fields.IntField(choices=BUILD_TYPES,
                                  required=True, default=BUILD_TYPES[0][0])
 
 

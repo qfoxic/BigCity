@@ -2,8 +2,6 @@ import datetime
 
 from mongoengine import Document, fields, NULLIFY, CASCADE
 
-from mfs.common.lib import address_to_geo
-
 
 class Node(Document):
     meta = {
@@ -77,16 +75,4 @@ class Resource(Document):
         self.tag = self.tag if self.tag else self.get_tag()
 
         return super(Resource, self).save(*args, **kwargs)
-
-
-# Used for geospacial requests.
-class GeoResource(Resource):
-    geo_location = fields.GeoPointField()
-
-    def resolve_to_geo(self, *args):
-        self.geo_location = address_to_geo(*args)
-
-    meta = {
-        'indexes': [[("location", "2dsphere"),]]
-    }
 

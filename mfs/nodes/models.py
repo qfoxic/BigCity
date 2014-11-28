@@ -4,16 +4,12 @@ from mongoengine import Document, fields, NULLIFY, CASCADE
 
 
 class Node(Document):
-    meta = {
-        'allow_inheritance': True
-    }
-
     uid = fields.IntField(required=True, min_value=1)
     #unix permission.
     perm = fields.StringField(default='666')
     # dot separated path of entity's ids.
     path = fields.StringField(max_length=3000)
-    kind = fields.StringField(max_length=15)
+    kind = fields.StringField(max_length=50)
     #timestamp
     created = fields.DateTimeField()
     #timestamp
@@ -25,8 +21,9 @@ class Node(Document):
     # We can use access_levels instead of groups.
     access_level = fields.ListField()
 
-    def get_kind(self):
-        return self.__class__.__name__.lower()
+    meta = {
+        'allow_inheritance': True
+    }
 
     def save(self, *args, **kwargs):
         if not self.created:
@@ -45,13 +42,12 @@ class Node(Document):
             self.path = '.'.join(path)
         return super(Node, self).save(*args, **kwargs)
 
+    def get_kind(self):
+        return self.__class__.__name__.lower()
+
 
 class Resource(Document):
-    meta = {
-        'allow_inheritance': True
-    }
-
-    kind = fields.StringField(max_length=15)
+    kind = fields.StringField(max_length=50)
     # timestamp.
     created = fields.DateTimeField()
     # timestamp.
@@ -59,20 +55,16 @@ class Resource(Document):
     # Parent record. Mongo object id. We don't have resource parents
     parent = fields.ReferenceField('Node', reverse_delete_rule=CASCADE,
                                    required=True)
-    # Some name can be used to determine an object.
-    tag = fields.StringField()
 
-    def get_kind(self):
-        return self.__class__.__name__.lower()
-
-    def get_tag(self):
-        return self.get_kind()
+    meta = {
+        'allow_inheritance': True
+    }
 
     def save(self, *args, **kwargs):
         if not self.created:
             self.created = datetime.datetime.utcnow()
         self.kind = self.get_kind()
-        self.tag = self.tag if self.tag else self.get_tag()
-
         return super(Resource, self).save(*args, **kwargs)
 
+    def get_kind(self):
+        return self.__class__.__name__.lower()

@@ -20,9 +20,11 @@ drouter.register(r'login', UserLoginView, base_name='login')
 drouter.register(r'node', NodesViewSet, base_name='node') # TODO. For tests only.
 drouter.register(r'resource', ResourcesViewSet, base_name='resource') # TODO. For tests only.
 
-drouter.register(r'category', CategoryViewSet, base_name='category')
-drouter.register(r'advert', AdvertViewSet, base_name='advert')
+# Category.
+drouter.register(r'category', CategoryViewSet, base_name='category') # Node.
 
+# Advert url.
+drouter.register(r'advert', AdvertViewSet, base_name='advert') # Node.
 drouter.register(r'building', BuildingPropertiesResourceViewSet, base_name='building')
 drouter.register(r'address', AddressResourceViewSet, base_name='address')
 drouter.register(r'price', PriceResourceViewSet, base_name='price')

@@ -38,6 +38,9 @@ class AddressResource(Resource):
                             self.city, self.street)
         return super(AddressResource, self).save(*args, **kwargs)
 
+    def get_kind(self):
+        return 'address'
+
 
 class BuildingPropertiesResource(Resource):
     rooms = fields.IntField(required=True, default=0)
@@ -51,6 +54,9 @@ class BuildingPropertiesResource(Resource):
     build_type = fields.IntField(choices=BUILD_TYPES,
                                  required=True, default=BUILD_TYPES[0][0])
 
+    def get_kind(self):
+        return 'building'
+
 
 class PriceResource(Resource):
     price = fields.DecimalField()
@@ -58,10 +64,13 @@ class PriceResource(Resource):
     # In seconds. 0 - means doesn't have duration.
     duration = fields.IntField(default=0)
 
+    def get_kind(self):
+        return 'price'
+
 
 class PosterResource(Resource):
     title = fields.StringField(max_length=500)
     text = fields.StringField(max_length=5000)
 
-
-
+    def get_kind(self):
+        return 'poster'

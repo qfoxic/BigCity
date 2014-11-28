@@ -1,4 +1,4 @@
-import urllib2
+import httplib
 import json
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -95,9 +95,18 @@ def check_perm(node, user, perm_to_check):
 
 
 def address_to_geo(*args):
-    resp = urllib2.urlopen(co.GOOGLE_MAPS.format(','.join(args))).read()
+    headers = {
+        'User-Agent': 'python-requests/2.2.1.CPython/2.7.6.Linux/3.13.0-39-generic',
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip,deflate,compress'
+    }
+    conn = httplib.HTTPConnection(co.MAPS_HOST)
+    # We have to replace whitespaces with +.
+    conn.request('GET', co.MAPS_URL.format(','.join([i.strip().replace(' ', '+') for i in args])),
+                 '', headers)
+    resp = conn.getresponse()
     try:
-        converted = json.loads(resp)
+        converted = json.loads(resp.read())
     except TypeError:
         return 0.0, 0.0
     loc = converted['results'][0]['geometry']['location']

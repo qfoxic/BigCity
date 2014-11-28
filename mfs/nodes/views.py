@@ -38,7 +38,7 @@ class NodesViewSet(vws.BaseViewSet):
         if not clib.check_perm(node['result'], user['result'], co.READ):
             return Response(
                 data=clib.jsonerror('You do not have read permissions'),
-                status=status.HTTP_403_FORBIDDEN)
+                status=status.HTTP_401_UNAUTHORIZED)
         return Response(data=self.manager.data(pk=pk))
 
     def update(self, request, pk=None):
@@ -49,7 +49,7 @@ class NodesViewSet(vws.BaseViewSet):
         if not clib.check_perm(node['result'], user['result'], co.WRITE):
             return Response(
                 data=clib.jsonerror('You do not have write permissions'),
-                status=status.HTTP_403_FORBIDDEN)
+                status=status.HTTP_401_UNAUTHORIZED)
         res = self.manager.upd(pk=pk)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
@@ -63,13 +63,13 @@ class NodesViewSet(vws.BaseViewSet):
         if not clib.check_perm(node['result'], user['result'], co.WRITE):
             return Response(
                 data=clib.jsonerror('You do not have write permissions'),
-                status=status.HTTP_403_FORBIDDEN)
+                status=status.HTTP_401_UNAUTHORIZED)
         return Response(data=self.manager.rm(pk))
 
     @link()
-    def reso_by_tag(self, request, pk=None):
+    def resources(self, request, pk=None):
         uid = request.user.pk
-        tag = request.GET.get('tag')
+        kind = request.GET.get('kind')
         um = usr.UsersManager(request)
         user = um.data(pk=uid)
         node = self.manager.data(pk=pk)
@@ -77,18 +77,21 @@ class NodesViewSet(vws.BaseViewSet):
         if not clib.check_perm(node['result'], user['result'], co.READ):
             return Response(
                 data=clib.jsonerror('You do not have read permissions'),
-                status=status.HTTP_403_FORBIDDEN)
-        return Response(data=rm.data(parent=node['result']['id'], tag=tag))
+                status=status.HTTP_401_UNAUTHORIZED)
+        return Response(data=rm.data(parent=node['result']['id'], kind=kind))
 
 
 class ResourcesViewSet(vws.BaseViewSet):
     permission_classes = [permissions.IsAuthenticated,]
     manager_class = nds.ResourcesManager
 
+    def get_node_manager(self, request):
+        return nds.NodesManager(request)
+
     def create(self, request):
         uid = request.user.pk
         nid = request.DATA.get('parent')
-        nm = nds.NodesManager(request)
+        nm = self.get_node_manager(request)
         um = usr.UsersManager(request)
         user = um.data(pk=uid)
         node = nm.data(pk=nid)
@@ -98,7 +101,7 @@ class ResourcesViewSet(vws.BaseViewSet):
         if not clib.check_perm(node['result'], user['result'], co.READ):
             return Response(
                 data=clib.jsonerror('You do not have read permissions to a node'),
-                status=status.HTTP_403_FORBIDDEN)
+                status=status.HTTP_401_UNAUTHORIZED)
         res = self.manager.add()
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
@@ -113,7 +116,7 @@ class ResourcesViewSet(vws.BaseViewSet):
                                user['result'], co.READ):
             return Response(
                 data=clib.jsonerror('You do not have read permissions'),
-                status=status.HTTP_403_FORBIDDEN)
+                status=status.HTTP_401_UNAUTHORIZED)
         return Response(data=resource)
 
     def update(self, request, pk=None):
@@ -125,7 +128,7 @@ class ResourcesViewSet(vws.BaseViewSet):
                                co.WRITE):
             return Response(
                 data=clib.jsonerror('You do not have write permissions to a node'),
-                status=status.HTTP_403_FORBIDDEN)
+                status=status.HTTP_401_UNAUTHORIZED)
         res = self.manager.upd(pk=pk)
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
@@ -140,6 +143,6 @@ class ResourcesViewSet(vws.BaseViewSet):
                                co.WRITE):
             return Response(
                 data=clib.jsonerror('You do not have write permissions to a node'),
-                status=status.HTTP_403_FORBIDDEN)
+                status=status.HTTP_401_UNAUTHORIZED)
         return Response(data=self.manager.rm(pk))
 

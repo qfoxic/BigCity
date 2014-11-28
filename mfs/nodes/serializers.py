@@ -9,8 +9,8 @@ Nodes can be hierarchical.
 Everything is build around one record with different types.
 Every record can have own data: that is python dict.
 
-Each resource can have special field - tag.
-We are able to find node's resource by tag without specifying id.
+Each resource can have special field - kind.
+We are able to find node's resource by kind without specifying id.
 
 Specific node type must inherit NodeSerializer, specify it's own type,
 specify serializer for data.
@@ -32,5 +32,5 @@ class ResourceSerializer(MongoEngineModelSerializer):
         depth = 2
         model = Resource
         fields = ('id', 'kind', 'created',
-                  'updated', 'parent', 'tag')
+                  'updated', 'parent')
 

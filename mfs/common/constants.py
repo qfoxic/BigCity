@@ -7,4 +7,6 @@ WRITE = 2
 EXEC = 1
 
 
-GOOGLE_MAPS = 'https://maps.googleapis.com/maps/api/geocode/json?address={}'
+MAPS_URL = '/maps/api/geocode/json?address={}'
+MAPS_HOST = 'maps.googleapis.com'
+

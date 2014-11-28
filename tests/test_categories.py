@@ -122,7 +122,7 @@ class NodeTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.get('/category/{}/'.format(pid1), format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_same_group_read_perm_deny(self):
@@ -138,7 +138,7 @@ class NodeTests(APITestCase):
         uid2 = self._createAndLoginUser('user1')
         self._createAndAddGroup('test', uid2, create=False)
         response = self.client.get('/category/{}/'.format(pid1), format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_diff_group_read_perm_deny(self):
@@ -154,7 +154,7 @@ class NodeTests(APITestCase):
         uid2 = self._createAndLoginUser('user1')
         self._createAndAddGroup('test1', uid2)
         response = self.client.get('/category/{}/'.format(pid1), format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_same_group_read_perm_access(self):
@@ -203,7 +203,7 @@ class NodeTests(APITestCase):
         self._createAndAddGroup('test', uid2, create=False)
         response = self.client.put('/category/{}/'.format(pid1), {'perm': '444'},
                                    format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_diff_group_write_perm_deny(self):
@@ -220,7 +220,7 @@ class NodeTests(APITestCase):
         self._createAndAddGroup('test1', uid2)
         response = self.client.put('/category/{}/'.format(pid1), {'perm': '444'},
                                    format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_same_group_write_perm_access(self):
@@ -289,7 +289,7 @@ class NodeTests(APITestCase):
         self._createAndAddGroup('test', uid2, create=False)
         for p in [pid1]:
             response = self.client.delete('/category/{}/'.format(p))
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_diff_group_delete_perm_deny(self):
@@ -304,7 +304,7 @@ class NodeTests(APITestCase):
         self._createAndAddGroup('test1', uid2)
         for p in [pid1]:
             response = self.client.delete('/category/{}/'.format(p))
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
 

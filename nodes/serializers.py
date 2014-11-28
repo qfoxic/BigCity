@@ -22,7 +22,7 @@ class AddressResourceSerializer(ResourceSerializer):
     class Meta(ResourceSerializer.Meta):
         model = AddressResource
         fields = ResourceSerializer.Meta.fields + ('country', 'region',
-                                                   'city', 'street')
+                                                   'city', 'street', 'location')
 
 
 class BuildingPropertiesResourceSerializer(ResourceSerializer):

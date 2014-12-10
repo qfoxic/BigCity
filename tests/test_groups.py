@@ -8,9 +8,9 @@ from rest_framework.test import APIClient
 class GroupSuperUserTests(APITestCase):
 
     def setUp(self):
-        Users.objects.create_superuser('teste', 'wwwbnv@uke.nee', 'qwerty')
+        Users.objects.create_superuser('wwwbn@uke.nee', 'wwwbn@uke.nee', 'QAZqaz!@#$%^&*()_+')
         self.client = APIClient()
-        self.client.login(username='teste', password='qwerty')
+        self.client.login(username='wwwbn@uke.nee', password='QAZqaz!@#$%^&*()_+')
 
     def tearDown(self):
         self.client.logout()
@@ -51,9 +51,9 @@ class GroupSuperUserTests(APITestCase):
         response = self.client.post('/group/', data1, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.get('/group/', format='json')
-        self.assertEqual(response.data['result'],
-                         [{'id': 1, 'name': u'test'},
-                          {'id': 2, 'name': u'test1'}])
+        self.assertAlmostEqual(response.data['result'],
+                               [{u'id': 1, 'name': u'test'},
+                                {u'id': 2, 'name': u'test1'}])
 
 
 

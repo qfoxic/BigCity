@@ -8,11 +8,18 @@ class UserSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = ('id', 'username', 'email', 'first_name', 'last_name',
                   'is_active', 'password')
+        read_only_fields = ('username',)
         write_only_fields = ('password',)
 
     # turn text to hashed password
-    def restore_object(self, attrs, instance=None):
-        if attrs.get('password'):
-            attrs['password'] = make_password(attrs['password'])
-        return super(UserSerializer, self).restore_object(attrs, instance)
+    def update(self, instance, validated_data):
+        if validated_data.get('password'):
+            validated_data['password'] = make_password(validated_data['password'])
+        return super(UserSerializer, self).update(instance, validated_data)
+
+    def create(self, validated_data):
+        model = get_user_model()
+        validated_data['username'] = validated_data['email']
+        validated_data['password'] = make_password(validated_data['password'])
+        return model.objects.create(**validated_data)
 

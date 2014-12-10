@@ -32,21 +32,21 @@ class BaseManager(object):
         return jsonsuccess('Object id:<%s> has been removed' % (pk,))
 
     def add(self, **kwargs):
-        data = self.request.DATA
+        data = self.request.data
         if kwargs:
             data.update(kwargs)
-        s = self.serializer(data=data)
-        if s.is_valid():
-            s.save()
-            return jsonresult(s.data)
-        return jsonerror(s.errors)
+        srl = self.serializer(data=data)
+        if srl.is_valid():
+            srl.save()
+            return jsonresult(srl.data)
+        return jsonerror(srl.errors)
 
     def upd(self, **kwargs):
         res = get_obj(self.serializer, **kwargs)
         if res.get('error'):
             return jsonerror(res['error'])
         srl = self.serializer(res['object'],
-                              data=self.request.DATA,
+                              data=self.request.data,
                               partial=True)
         if srl.is_valid():
             srl.save()
@@ -65,7 +65,10 @@ def jsonsuccess(msg):
 
 
 def jsonresult(item):
-    return {'result': item}
+    try:
+        return {'result': json.loads(json.dumps(item))}
+    except TypeError:
+        return {'result': []}
 
 
 def get_obj(serializer, **kwargs):

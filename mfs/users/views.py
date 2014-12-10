@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from rest_framework.decorators import action, link
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -28,13 +28,13 @@ class UserViewSet(vws.BaseViewSet):
     def destroy(self, request, pk=None):
         return Response(data=self.manager.rm(pk))
 
-    @action()
+    @detail_route(methods=['post'])
     def chpasswd(self, request, pk=None):
         return Response(data=self.manager.chpasswd(pk))
 
-    @action()
+    @detail_route(methods=['post'])
     def addgroup(self, request, pk=None):
-        gid = request.DATA.get('gid')
+        gid = request.data.get('gid')
         group_manager = grp.GroupManager(request)
         res = group_manager.data(pk=gid)
         if res.get('error'):
@@ -44,9 +44,9 @@ class UserViewSet(vws.BaseViewSet):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=self.manager.add_group(pk, gid))
 
-    @action()
+    @detail_route(methods=['post'])
     def rmgroup(self, request, pk=None):
-        gid = request.DATA.get('gid')
+        gid = request.data.get('gid')
         group_manager = grp.GroupManager(request)
         res = group_manager.data(pk=gid)
         if res.get('error'):
@@ -56,7 +56,7 @@ class UserViewSet(vws.BaseViewSet):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=self.manager.rm_group(pk, gid))
 
-    @link()
+    @detail_route(methods=['get'])
     def groups(self, request, pk=None):
         return Response(data=self.manager.groups(pk))
 
@@ -77,12 +77,12 @@ class UserLoginView(vws.BaseViewSet):
     manager_class = usr.UsersManager
 
     def create(self, request):
-        username, password = (request.DATA.get('username'),
-                              request.DATA.get('password'))
+        username, password = (request.data.get('username'),
+                              request.data.get('password'))
         res = self.manager.login(request, username, password)
         if res:
-            return Response()
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=res)
+        return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserLogoutView(vws.BaseViewSet):
@@ -92,5 +92,5 @@ class UserLogoutView(vws.BaseViewSet):
     def list(self, request):
         res = self.manager.logout(request)
         if res:
-            return Response()
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(res)
+        return Response(res, status=status.HTTP_400_BAD_REQUEST)

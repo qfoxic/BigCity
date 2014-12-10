@@ -1,36 +1,28 @@
-import warnings
+import copy
+import mongoengine
+
 from mongoengine.errors import ValidationError
 from rest_framework import serializers
 from rest_framework import fields
-import mongoengine
-from mongoengine.base import BaseDocument
-from django.core.paginator import Page
 from django.db import models
 from django.forms import widgets
 from django.utils.datastructures import SortedDict
+from rest_framework.compat import OrderedDict
 from rest_framework.compat import get_concrete_model
-from .fields import ReferenceField, ListField, EmbeddedDocumentField, DynamicField
-
-
-class MongoEngineModelSerializerOptions(serializers.ModelSerializerOptions):
-    """
-    Meta class options for MongoEngineModelSerializer
-    """
-    def __init__(self, meta):
-        super(MongoEngineModelSerializerOptions, self).__init__(meta)
-        self.depth = getattr(meta, 'depth', 5)
+from .fields import (ReferenceField, ListField, EmbeddedDocumentField,
+                     DynamicField, ObjectIdField, GeoPointField, DecimalField)
 
 
 class MongoEngineModelSerializer(serializers.ModelSerializer):
     """
     Model Serializer that supports Mongoengine
     """
-    _options_class = MongoEngineModelSerializerOptions
 
-    def perform_validation(self, attrs):
+    def run_validation(self, attrs):
         """
         Rest Framework built-in validation + related model validations
         """
+        self._errors = {}
         for field_name, field in self.fields.items():
             if field_name in self._errors:
                 continue
@@ -64,64 +56,25 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
 
         return attrs
 
-    def restore_object(self, attrs, instance=None):
-        if instance is None:
-            instance = self.opts.model()
-
-        dynamic_fields = self.get_dynamic_fields(instance)
-        all_fields = dict(dynamic_fields, **self.fields)
-
-        for key, val in attrs.items():
-            field = all_fields.get(key)
-            if not field or field.read_only:
-                continue
-
-            if isinstance(field, serializers.Serializer):                
-                many = field.many
-
-                def _restore(field, item):
-                    # looks like a bug, sometimes there are decerialized objects in attrs
-                    # sometimes they are just dicts 
-                    if isinstance(item, BaseDocument):
-                        return item 
-                    return field.from_native(item)
-
-                if many:                    
-                    val = [_restore(field, item) for item in val] 
-                else:
-                    val = _restore(field, val) 
-
-            key = getattr(field, 'source', None) or key
-            try:
-                setattr(instance, key, val)
-            except ValueError:
-                self._errors[key] = self.error_messages['required']
-
-        return instance
-
-    def get_default_fields(self):
-        cls = self.opts.model
+    def get_fields(self):
+        cls = self.Meta.model
         opts = get_concrete_model(cls)
-        fields = []
+        fields = list(copy.deepcopy(self._declared_fields))
         fields += [getattr(opts, field) for field in cls._fields_ordered]
 
         ret = SortedDict()
-
         for model_field in fields:
-            if isinstance(model_field, mongoengine.ObjectIdField):
-                field = self.get_pk_field(model_field)
-            else:
-                field = self.get_field(model_field)
-
+            field = self.get_field(model_field)
             if field:
-                field.initialize(parent=self, field_name=model_field.name)
                 ret[model_field.name] = field
 
-        for field_name in self.opts.read_only_fields:
-            assert field_name in ret,\
-            "read_only_fields on '%s' included invalid item '%s'" %\
-            (self.__class__.__name__, field_name)
-            ret[field_name].read_only = True
+        read_only_fields = getattr(self.Meta, 'read_only_fields', None)
+        if read_only_fields:
+            for field_name in self.Meta.read_only_fields:
+                assert field_name in ret,\
+                "read_only_fields on '%s' included invalid item '%s'" %\
+                (self.__class__.__name__, field_name)
+                ret[field_name].read_only = True
 
         return ret
 
@@ -136,9 +89,11 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
         kwargs = {}
 
         if model_field.__class__ in (mongoengine.ReferenceField, mongoengine.EmbeddedDocumentField,
-                                     mongoengine.ListField, mongoengine.DynamicField):
+                                     mongoengine.ListField, mongoengine.DynamicField,
+                                     mongoengine.ObjectIdField, mongoengine.GeoPointField,
+                                     mongoengine.DecimalField):
             kwargs['model_field'] = model_field
-            kwargs['depth'] = self.opts.depth
+            kwargs['depth'] = self.Meta.depth
 
         if not model_field.__class__ == mongoengine.ObjectIdField:
             kwargs['required'] = model_field.required
@@ -163,18 +118,18 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
             mongoengine.BooleanField: fields.BooleanField,
             mongoengine.FileField: fields.FileField,
             mongoengine.ImageField: fields.ImageField,
-            mongoengine.ObjectIdField: fields.Field,
+            mongoengine.ObjectIdField: ObjectIdField,
             mongoengine.ReferenceField: ReferenceField,
             mongoengine.ListField: ListField,
             mongoengine.EmbeddedDocumentField: EmbeddedDocumentField,
+            mongoengine.GeoPointField: GeoPointField,
             mongoengine.DynamicField: DynamicField,
-            mongoengine.DecimalField: fields.DecimalField,
+            mongoengine.DecimalField: DecimalField,
             mongoengine.UUIDField: fields.CharField
         }
 
         attribute_dict = {
             mongoengine.StringField: ['max_length'],
-            mongoengine.DecimalField: ['min_value', 'max_value'],
             mongoengine.EmailField: ['max_length'],
             mongoengine.FileField: ['max_length'],
             mongoengine.URLField: ['max_length'],
@@ -185,78 +140,44 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
             for attribute in attributes:
                 kwargs.update({attribute: getattr(model_field, attribute)})
 
-        try:
-            return field_mapping[model_field.__class__](**kwargs)
-        except KeyError:
-            # Defaults to WritableField if not in field mapping
-            return fields.WritableField(**kwargs)
+        return field_mapping[model_field.__class__](**kwargs)
 
-    def to_native(self, obj):
+    def create(self, validated_attrs):
+        return self.Meta.model.objects.create(**validated_attrs)
+
+    def to_representation(self, obj):
         """
         Rest framework built-in to_native + transform_object
         """
-        ret = self._dict_class()
-        ret.fields = self._dict_class()
-
         #Dynamic Document Support
         dynamic_fields = self.get_dynamic_fields(obj)
-        all_fields = self._dict_class()
+        all_fields = OrderedDict()
         all_fields.update(self.fields)
         all_fields.update(dynamic_fields)
-
-        for field_name, field in all_fields.items():
-            if field.read_only and obj is None:
-                continue
-            field.initialize(parent=self, field_name=field_name)
-            key = self.get_field_key(field_name)
-            value = field.field_to_native(obj, field_name)
-            #Override value with transform_ methods
-            method = getattr(self, 'transform_%s' % field_name, None)
-            if callable(method):
-                value = method(obj, value)
-            if not getattr(field, 'write_only', False):
-                ret[key] = value
-            ret.fields[key] = self.augment_field(field, field_name, key, value)
-
+        ret = OrderedDict()
+        _fields = [field for field in all_fields.values() if not field.write_only]
+        for field in _fields:
+            attribute = field.get_attribute(obj)
+            if attribute is None:
+                ret[field.field_name] = None
+            else:
+                ret[field.field_name] = field.to_representation(attribute)
         return ret
 
-    def from_native(self, data, files=None):
+    def to_internal_value(self, data):
         self._errors = {}
 
-        if data is not None or files is not None:
+        if data is not None:
             attrs = self.restore_fields(data, files)
             for key in data.keys():
                 if key not in attrs:
                     attrs[key] = data[key]
             if attrs is not None:
-                attrs = self.perform_validation(attrs)
+                attrs = self.run_validation(attrs)
         else:
             self._errors['non_field_errors'] = ['No input provided']
 
         if not self._errors:
-            return self.restore_object(attrs, instance=getattr(self, 'object', None))
+            return self.create(attrs)
 
-    @property
-    def data(self):
-        """
-        Returns the serialized data on the serializer.
-        """
-        if self._data is None:
-            obj = self.object
-
-            if self.many is not None:
-                many = self.many
-            else:
-                many = hasattr(obj, '__iter__') and not isinstance(obj, (BaseDocument, Page, dict))
-                if many:
-                    warnings.warn('Implicit list/queryset serialization is deprecated. '
-                                  'Use the `many=True` flag when instantiating the serializer.',
-                                  DeprecationWarning, stacklevel=2)
-
-            if many:
-                self._data = [self.to_native(item) for item in obj]
-            else:
-                self._data = self.to_native(obj)
-
-        return self._data
 

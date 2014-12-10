@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from rest_framework.response import Response
-from rest_framework.decorators import link
+from rest_framework.decorators import detail_route
 from rest_framework import status
 
 import mfs.nodes.managers as nds
@@ -66,7 +66,7 @@ class NodesViewSet(vws.BaseViewSet):
                 status=status.HTTP_401_UNAUTHORIZED)
         return Response(data=self.manager.rm(pk))
 
-    @link()
+    @detail_route()
     def resources(self, request, pk=None):
         uid = request.user.pk
         kind = request.GET.get('kind')
@@ -90,7 +90,7 @@ class ResourcesViewSet(vws.BaseViewSet):
 
     def create(self, request):
         uid = request.user.pk
-        nid = request.DATA.get('parent')
+        nid = request.data.get('parent')
         nm = self.get_node_manager(request)
         um = usr.UsersManager(request)
         user = um.data(pk=uid)

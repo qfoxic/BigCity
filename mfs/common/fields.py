@@ -6,9 +6,10 @@ from mongoengine.base.document import BaseDocument
 from mongoengine.document import Document
 from rest_framework import serializers
 from mongoengine.fields import ObjectId
+from datetime import date
 
 
-class MongoDocumentField(serializers.WritableField):
+class MongoDocumentField(serializers.Field):
     MAX_RECURSION_DEPTH = 5  # default value of depth
 
     def __init__(self, *args, **kwargs):
@@ -19,6 +20,9 @@ class MongoDocumentField(serializers.WritableField):
             raise ValueError("%s requires 'model_field' kwarg" % self.type_label)
 
         super(MongoDocumentField, self).__init__(*args, **kwargs)
+
+    def to_representation(self, value):
+        return value
 
     def transform_document(self, document, depth):
         data = {}
@@ -62,14 +66,14 @@ class MongoDocumentField(serializers.WritableField):
         elif obj is None:
             return None
         else:
-            return smart_str(obj) if isinstance(obj, ObjectId) else obj
+            return smart_str(obj) if isinstance(obj, (ObjectId, date)) else obj
 
 
 class ReferenceField(MongoDocumentField):
 
     type_label = 'ReferenceField'
 
-    def from_native(self, value):
+    def to_internal_value(self, value):
         try:
             dbref = self.model_field.to_python(value)
         except InvalidId:
@@ -84,7 +88,7 @@ class ReferenceField(MongoDocumentField):
 
         return instance
 
-    def to_native(self, obj):
+    def to_representation(self, obj):
         return self.transform_object(obj, self.depth-1)
 
 
@@ -92,11 +96,27 @@ class ListField(MongoDocumentField):
 
     type_label = 'ListField'
 
-    def from_native(self, value):
+    def to_representation(self, value):
         return self.model_field.to_python(value)
 
-    def to_native(self, obj):
+    def to_internal_value(self, obj):
         return self.transform_object(obj, self.depth)
+
+
+class GeoPointField(MongoDocumentField):
+
+    type_label = 'GeoPointField'
+
+    def to_representation(self, value):
+        return self.model_field.to_python(value)
+
+
+class DecimalField(MongoDocumentField):
+
+    type_label = 'DecimalField'
+
+    def to_representation(self, value):
+        return self.model_field.to_mongo(value)
 
 
 class EmbeddedDocumentField(MongoDocumentField):
@@ -111,16 +131,16 @@ class EmbeddedDocumentField(MongoDocumentField):
 
         super(EmbeddedDocumentField, self).__init__(*args, **kwargs)
 
-    def get_default_value(self):
+    def get_default(self):
         return self.to_native(self.default())
 
-    def to_native(self, obj):
+    def to_internal_value(self, obj):
         if obj is None:
             return None
         else:
             return self.transform_object(obj, self.depth)
 
-    def from_native(self, value):
+    def to_representation(self, value):
         return self.model_field.to_python(value)
 
 
@@ -128,5 +148,29 @@ class DynamicField(MongoDocumentField):
 
     type_label = 'DynamicField'
 
-    def to_native(self, obj):
-        return self.model_field.to_python(obj)
+    def to_internal_value(self, data):
+        return self.model_field.to_python(data)
+
+
+class ObjectIdField(MongoDocumentField):
+    """A field wrapper around MongoDB's ObjectIds.
+    """
+    type_label = 'ObjectIdField'
+
+    def to_representation(self, value):
+        return str(value)
+
+    def to_mongo(self, value):
+        if not isinstance(value, ObjectId):
+            try:
+                return ObjectId(unicode(value))
+            except Exception, e:
+                # e.message attribute has been deprecated since Python 2.6
+                self.fail(unicode(e))
+        return value
+
+    def prepare_query_value(self, op, value):
+        return self.to_mongo(value)
+
+    def to_internal_value(self, value):
+        return self.to_mongo(value)

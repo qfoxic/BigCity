@@ -26,8 +26,9 @@ class UsersManager(clib.BaseManager):
             return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'])
         gids = self.groups(res['object'].pk)
-        srl.data['groups'] = gids['result']
-        return clib.jsonresult(srl.data)
+        resp = clib.jsonresult(srl.data)
+        resp['result']['groups'] = gids['result']
+        return resp
 
     def chpasswd(self, pk):
         res = clib.get_obj(self.serializer, **{'pk': pk})
@@ -35,7 +36,7 @@ class UsersManager(clib.BaseManager):
             return clib.jsonerror(res['error'])
         user = res['object']
         try:
-            user.set_password(self.request.DATA['password'])
+            user.set_password(self.request.data['password'])
             user.save()
             return clib.jsonsuccess('Password has been changed')
         except KeyError:
@@ -62,4 +63,6 @@ class UsersManager(clib.BaseManager):
             user = self.serializer.Meta.model.objects.get(pk=uid)
         except Exception, e:
             return clib.jsonerror(str(e))
-        return clib.jsonresult(user.groups.values_list('id', 'name'))
+        return clib.jsonresult(
+            [(i[0], i[1]) for i in user.groups.values_list('id', 'name')]
+        )

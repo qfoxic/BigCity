@@ -3,6 +3,7 @@ import json
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
+from mfs.common.serializers import cast_serializer
 
 import mfs.common.constants as co
 
@@ -18,11 +19,20 @@ class BaseManager(object):
         return jsonresult(self.serializer(queryset, many=True).data)
 
     def data(self, **kwargs):
-        res = get_obj(self.serializer, **kwargs)
-        if res.get('error'):
-            return jsonerror(res['error'])
-        srl = self.serializer(res['object'])
-        return jsonresult(srl.data)
+        try:
+            cast = kwargs.pop('cast')
+            many = kwargs.pop('many')
+        except KeyError:
+            cast, many = False, False
+
+        if many:
+            res = get_objs(self.serializer, **kwargs)
+        else:
+            res = get_obj(self.serializer, **kwargs)
+        if cast:
+            self.serializer = (cast_serializer(kwargs.get('kind'))
+                               or self.serializer)
+        return jsonresult(self.serializer(res['object'], many=many).data)
 
     def rm(self, pk):
         res = get_obj(self.serializer, **{'pk': pk})
@@ -76,6 +86,11 @@ def get_obj(serializer, **kwargs):
         instance = serializer.Meta.model.objects.get(**kwargs)
     except (ObjectDoesNotExist, ValueError, serializer.Meta.model.DoesNotExist):
         raise Http404
+    return {'object': instance}
+
+
+def get_objs(serializer, **kwargs):
+    instance = serializer.Meta.model.objects(**kwargs)
     return {'object': instance}
 
 

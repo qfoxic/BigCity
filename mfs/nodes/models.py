@@ -42,8 +42,9 @@ class Node(Document):
             self.path = '.'.join(path)
         return super(Node, self).save(*args, **kwargs)
 
-    def get_kind(self):
-        return self.__class__.__name__.lower()
+    @classmethod
+    def get_kind(cls):
+        return cls.__name__.lower()
 
 
 class Resource(Document):
@@ -66,5 +67,6 @@ class Resource(Document):
         self.kind = self.get_kind()
         return super(Resource, self).save(*args, **kwargs)
 
-    def get_kind(self):
-        return self.__class__.__name__.lower()
+    @classmethod
+    def get_kind(cls):
+        return cls.__name__.lower()

@@ -13,10 +13,25 @@ from .fields import (ReferenceField, ListField, EmbeddedDocumentField,
                      DynamicField, ObjectIdField, GeoPointField, DecimalField)
 
 
+kinds_registry = {}
+
+
+def cast_serializer(model_kind):
+    # Returns serializers class by model.
+    return kinds_registry.get(model_kind)
+
+
 class MongoEngineModelSerializer(serializers.ModelSerializer):
     """
     Model Serializer that supports Mongoengine
     """
+    def __init__(self, instance=None, data=None, **kwargs):
+
+        global kinds_registry
+        kinds_registry[self.__class__.Meta.model.get_kind()] = self.__class__
+
+        return super(MongoEngineModelSerializer, self).__init__(
+            instance, data, **kwargs)
 
     def run_validation(self, attrs):
         """

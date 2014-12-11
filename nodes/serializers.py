@@ -44,5 +44,3 @@ class PosterResourceSerializer(ResourceSerializer):
     class Meta(ResourceSerializer.Meta):
         model = PosterResource
         fields = ResourceSerializer.Meta.fields + ('title', 'text')
-
-

@@ -78,7 +78,10 @@ class NodesViewSet(vws.BaseViewSet):
             return Response(
                 data=clib.jsonerror('You do not have read permissions'),
                 status=status.HTTP_401_UNAUTHORIZED)
-        return Response(data=rm.data(parent=node['result']['id'], kind=kind))
+        return Response(data=rm.data(parent=node['result']['id'],
+                                     kind=kind,
+                                     cast=True,
+                                     many=True))
 
 
 class ResourcesViewSet(vws.BaseViewSet):

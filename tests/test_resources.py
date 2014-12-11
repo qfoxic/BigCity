@@ -159,7 +159,7 @@ class ResourceTests(APITestCase):
                                    {'kind': 'resource'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['result']['id'], reso_id)
+        self.assertEqual(response.data['result'][0]['id'], reso_id)
         self._removeNodes(pid1, pid2)
 
     def test_data_tag_perms_deny(self):

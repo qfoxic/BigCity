@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 from rest_framework.test import APIClient
 
 
-class NodeTests(APITestCase):
+class AdvertTests(APITestCase):
     def setUp(self):
         Users.objects.create_superuser('wwwbnv@uke.nee', 'wwwbnv@uke.nee', 'qwerty')
         self.client = APIClient()
@@ -119,43 +119,41 @@ class NodeTests(APITestCase):
         self.assertEqual(response.data['result']['title'], 'test1')
         self._removeNodes(pid1, pid2, pid3)
 
-    # TODO. A big problem with fields.
-    def est_get_advert_resources(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee')
+    def test_get_advert_resources(self):
+        uid = self._createAndLoginUser('wwwbnv@uke1111.nee')
         self._createAndAddGroup('test', uid)
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/advert/{}/resources/'.format(pid1),
                                    {'kind': 'price'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['result']['duration'], 81400)
-        rid = response.data['result']['id']
+        self.assertEqual(response.data['result'][0]['duration'], 81400)
+        rid = response.data['result'][0]['id']
         response = self.client.get('/advert/{}/resources/'.format(pid1),
                                    {'rid': rid}, format='json')
         response = self.client.get('/advert/{}/resources/'.format(pid1),
                                    {'kind': 'address'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['result']['city'], 'Lviv')
-        rid = response.data['result']['id']
-        response = self.client.get('/advert/{}/resources/'.format(pid1),
-                                   {'rid': rid}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['result'][0]['city'], 'Lviv')
+        rid = response.data['result'][0]['id']
         response = self.client.get('/advert/{}/resources/'.format(pid1),
                                    {'kind': 'poster'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['result']['text'], 'SOME TEXT')
+        self.assertEqual(response.data['result'][0]['text'], 'SOME TEXT')
         self._removeNodes(pid1, pid2, pid3)
 
-    def est_owner_read_perm(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee')
+    def test_get_multiple_resources_of_the_same_kind(self):
+        uid = self._createAndLoginUser('wwwbnv@uke1111.nee')
         self._createAndAddGroup('test', uid)
         pid1, pid2, pid3 = self._createTree(uid)
-        response = self.client.get('/category/{}/'.format(pid1), format='json')
+        price = {'price': 12.3, 'duration': 8140, 'parent': pid1}
+        response = self.client.post('/price/', price, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.put('/category/{}/'.format(pid1), {'perm': '222'},
-                                   format='json')
+        response = self.client.get('/advert/{}/resources/'.format(pid1),
+                                   {'kind': 'price'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.get('/category/{}/'.format(pid1), format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        prices = response.data['result']
+        for price in prices:
+            self.assertTrue(price['price'] in [12.3, 12.23])
         self._removeNodes(pid1, pid2, pid3)
 
     def est_same_group_read_perm_deny(self):

@@ -1,14 +1,14 @@
 from mfs.nodes.views import NodesViewSet, ResourcesViewSet
 from nodes.managers import (CategoryManager, AdvertManager,
-    AddressResourceManager, BuildingPropertiesResourceManager,
-    PriceResourceManager, PosterResourceManager)
+                            AddressResourceManager,
+                            BuildingPropertiesResourceManager,
+                            PriceResourceManager, PosterResourceManager)
 
 
 class CategoryViewSet(NodesViewSet):
     manager_class = CategoryManager
 
 
-# TODO. Get resource.
 class AdvertViewSet(NodesViewSet):
     manager_class = AdvertManager
 

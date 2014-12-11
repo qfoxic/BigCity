@@ -156,6 +156,11 @@ class AdvertTests(APITestCase):
             self.assertTrue(price['price'] in [12.3, 12.23])
         self._removeNodes(pid1, pid2, pid3)
 
+# TODO. Check permission of a resource.
+# TODO. Test update resource with perms.
+# TODO. Test remove resource with perms.
+# TODO. Test get reso with perms.
+
     def est_same_group_read_perm_deny(self):
         uid = self._createAndLoginUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)

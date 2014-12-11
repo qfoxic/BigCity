@@ -1,7 +1,9 @@
 from mfs.nodes.managers import NodesManager, ResourcesManager
 from nodes.serializers import (CategorySerializer,
-    AdvertSerializer, AddressResourceSerializer, BuildingPropertiesResourceSerializer,
-    PriceResourceSerializer, PosterResourceSerializer)
+                               AdvertSerializer, AddressResourceSerializer,
+                               BuildingPropertiesResourceSerializer,
+                               PriceResourceSerializer,
+                               PosterResourceSerializer)
 
 
 class CategoryManager(NodesManager):

@@ -79,21 +79,21 @@ class NodeTests(APITestCase):
         data = response.data['result']
         self.assertEqual(pid1, data['id'])
         self.assertEqual(uid, data['uid'])
-        self.assertEqual([gid], data['access_level'])
+        self.assertEqual(gid, data['access_level'])
         self.assertEqual(None, data['parent'])
         response = self.client.get('/node/{}/'.format(pid2), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data['result']
         self.assertEqual(pid2, data['id'])
         self.assertEqual(uid, data['uid'])
-        self.assertEqual([gid], data['access_level'])
+        self.assertEqual(gid, data['access_level'])
         self.assertEqual(pid1, data['parent'])
         response = self.client.get('/node/{}/'.format(pid3), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data['result']
         self.assertEqual(pid3, data['id'])
         self.assertEqual(uid, data['uid'])
-        self.assertEqual([gid], data['access_level'])
+        self.assertEqual(gid, data['access_level'])
         self.assertEqual(pid2, data['parent'])
         self._removeNodes(pid1, pid2, pid3)
 

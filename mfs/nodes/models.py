@@ -19,7 +19,7 @@ class Node(Document):
     # Shared to uids.
     shared = fields.ListField()
     # We can use access_levels instead of groups.
-    access_level = fields.ListField()
+    access_level = fields.IntField(required=True, min_value=1)
 
     meta = {
         'allow_inheritance': True

@@ -105,7 +105,7 @@ def check_perm(node, user, perm_to_check):
     if uid == node['uid']:
         return bool(owner & perm_to_check)
     # If user is in at least one group the node is assigned to.
-    elif set(user_gids).intersection(node['access_level']):
+    elif node['access_level'] in user_gids:
         return bool(group & perm_to_check)
     else:
         return bool(other & perm_to_check)

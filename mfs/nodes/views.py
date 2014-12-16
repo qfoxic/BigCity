@@ -25,7 +25,7 @@ class NodesViewSet(vws.BaseViewSet):
             err = clib.jsonerror('User should be assigned to at least one group')
             return Response(data=err, status=status.HTTP_400_BAD_REQUEST)
         gids = [i[0] for i in gres.get('result')]
-        res = self.manager.add(uid=uid, access_level=gids)
+        res = self.manager.add(uid=uid, access_level=gids[0])
         if res.get('error'):
             return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=res)

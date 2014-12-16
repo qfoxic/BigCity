@@ -15,6 +15,7 @@ class AuthTokenTests(APITestCase):
         self.client.logout()
 
     def test_get_token(self):
+        self.client.logout()
         data = {'username': 'wwwbnv@uke.nee', 'password': 'qwerty'}
         response = self.client.post('/token/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

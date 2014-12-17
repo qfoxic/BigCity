@@ -1,6 +1,6 @@
 import datetime
 
-from mongoengine import Document, fields, NULLIFY, CASCADE
+from mongoengine import Document, fields, NULLIFY, CASCADE, queryset_manager, Q
 
 
 class Node(Document):
@@ -45,6 +45,12 @@ class Node(Document):
     @classmethod
     def get_kind(cls):
         return cls.__name__.lower()
+
+    @queryset_manager
+    def nodes(cls, uid, access_levels, queryset):
+        return queryset.filter(
+            Q(kind=cls.get_kind()) | Q(uid=uid) | Q(access_level__in=access_levels)
+        ).where('((1*this.perm[0])&4) || ((1*this.perm[1])&4) || ((1*this.perm[2])&4)')
 
 
 class Resource(Document):

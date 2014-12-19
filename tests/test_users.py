@@ -15,18 +15,19 @@ class UserTests(APITestCase):
         self.client.logout()
 
     def test_correct_add_user(self):
+        self.client.logout()
         data = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/register/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         user_id = response.data['result']['id']
+        self.client.login(username='wwwbnv@uke.nee', password='qwerty')
         response = self.client.get('/user/{}/'.format(user_id), format='json')
         data = response.data['result']
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data['resume'], 'super_file')
         self.assertEqual(data['email'], 'wwww@www.www')
-        self.client.login(username='wwwbnv@uke.nee', password='qwerty')
         response = self.client.delete('/user/{}/'.format(user_id),
                                       format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

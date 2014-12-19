@@ -13,6 +13,8 @@ class MongoDocumentField(serializers.Field):
     MAX_RECURSION_DEPTH = 5  # default value of depth
 
     def __init__(self, *args, **kwargs):
+        if self.__class__.__name__ == 'GeoPointField':
+            pass#import pdb;pdb.set_trace()
         try:
             self.model_field = kwargs.pop('model_field')
             self.depth = kwargs.pop('depth', self.MAX_RECURSION_DEPTH)

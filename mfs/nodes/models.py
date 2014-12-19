@@ -47,7 +47,7 @@ class Node(Document):
         return cls.__name__.lower()
 
     @queryset_manager
-    def nodes(cls, uid, access_levels, queryset):
+    def nodes(cls, queryset, uid, access_levels):
         return queryset.filter(
             Q(kind=cls.get_kind()) | Q(uid=uid) | Q(access_level__in=access_levels)
         ).where('((1*this.perm[0])&4) || ((1*this.perm[1])&4) || ((1*this.perm[2])&4)')

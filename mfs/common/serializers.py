@@ -105,7 +105,7 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
 
         if model_field.__class__ in (mongoengine.ReferenceField, mongoengine.EmbeddedDocumentField,
                                      mongoengine.ListField, mongoengine.DynamicField,
-                                     mongoengine.ObjectIdField, mongoengine.GeoPointField,
+                                     mongoengine.ObjectIdField, mongoengine.PointField,
                                      mongoengine.DecimalField):
             kwargs['model_field'] = model_field
             kwargs['depth'] = self.Meta.depth
@@ -137,7 +137,7 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
             mongoengine.ReferenceField: ReferenceField,
             mongoengine.ListField: ListField,
             mongoengine.EmbeddedDocumentField: EmbeddedDocumentField,
-            mongoengine.GeoPointField: GeoPointField,
+            mongoengine.PointField: GeoPointField,
             mongoengine.DynamicField: DynamicField,
             mongoengine.DecimalField: DecimalField,
             mongoengine.UUIDField: fields.CharField

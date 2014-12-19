@@ -1,4 +1,4 @@
-from mongoengine import fields
+from mongoengine import fields, Q, queryset_manager
 from mfs.nodes.models import Node
 from mfs.nodes.models import Resource
 
@@ -24,7 +24,7 @@ class AddressResource(Resource):
         'indexes': [[("location", "2dsphere"),]]
     }
 
-    location = fields.GeoPointField()
+    location = fields.PointField()
     country = fields.StringField(max_length=30)
     region = fields.StringField(max_length=30)
     city = fields.StringField(max_length=30)
@@ -41,6 +41,13 @@ class AddressResource(Resource):
     @classmethod
     def get_kind(cls):
         return 'address'
+
+    @queryset_manager
+    def nearest(cls, queryset, lon, lat, radius):
+        # radius in meters.
+        return queryset.filter(
+            Q(kind=cls.get_kind()) | Q(location__geo_within_center=[(lon, lat), radius])
+        )
 
 
 class BuildingPropertiesResource(Resource):

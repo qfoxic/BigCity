@@ -2,8 +2,6 @@ from mongoengine import fields, Q, queryset_manager
 from mfs.nodes.models import Node
 from mfs.nodes.models import Resource
 
-from mfs.common.lib import address_to_geo
-
 
 WALL_TYPES = ((0, 'Ferroconcrete'), (1, 'Brick'),)
 BUILD_TYPES = ((0, 'New'), (1, 'Secondary'),)
@@ -20,34 +18,24 @@ class Advert(Node):
 
 # Resources.
 class AddressResource(Resource):
-    meta = {
-        'indexes': [[("location", "2dsphere"),]]
-    }
-
-    location = fields.PointField()
+    loc = fields.PointField(required=True, default=[0.0, 0.0])
     country = fields.StringField(max_length=30)
     region = fields.StringField(max_length=30)
     city = fields.StringField(max_length=30)
     street = fields.StringField(max_length=100)
-
-    def resolve_to_geo(self, *args):
-        self.location = address_to_geo(*args)
-
-    def save(self, *args, **kwargs):
-        self.resolve_to_geo(self.country, self.region,
-                            self.city, self.street)
-        return super(AddressResource, self).save(*args, **kwargs)
 
     @classmethod
     def get_kind(cls):
         return 'address'
 
     @queryset_manager
-    def nearest(cls, queryset, lon, lat, radius):
+    def nearest(cls, queryset, lon, lat, radius=1000**2, count=1000):
+        # Select the count the nearest objects.
         # radius in meters.
         return queryset.filter(
-            Q(kind=cls.get_kind()) | Q(location__geo_within_center=[(lon, lat), radius])
-        )
+            Q(kind=cls.get_kind()) | Q(loc__geo_within_center=[(lon, lat), radius])
+        ).limit(count)
+        # TODO. Perform check permissions with parent.
 
 
 class BuildingPropertiesResource(Resource):

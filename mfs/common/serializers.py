@@ -10,7 +10,7 @@ from django.utils.datastructures import SortedDict
 from rest_framework.compat import OrderedDict
 from rest_framework.compat import get_concrete_model
 from .fields import (ReferenceField, ListField, EmbeddedDocumentField,
-                     DynamicField, ObjectIdField, GeoPointField, DecimalField)
+                     DynamicField, ObjectIdField, PointField, DecimalField)
 
 
 kinds_registry = {}
@@ -93,12 +93,12 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
 
         return ret
 
-    def get_dynamic_fields(self, obj):
-        dynamic_fields = {}
-        if obj is not None and obj._dynamic:
-            for key, value in obj._dynamic_fields.items():
-                dynamic_fields[key] = self.get_field(value)
-        return dynamic_fields
+    #def get_dynamic_fields(self, obj):
+    #    dynamic_fields = {}
+    #    if obj is not None and obj._dynamic:
+    #        for key, value in obj._dynamic_fields.items():
+    #            dynamic_fields[key] = self.get_field(value)
+    #    return dynamic_fields
 
     def get_field(self, model_field):
         kwargs = {}
@@ -137,7 +137,7 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
             mongoengine.ReferenceField: ReferenceField,
             mongoengine.ListField: ListField,
             mongoengine.EmbeddedDocumentField: EmbeddedDocumentField,
-            mongoengine.PointField: GeoPointField,
+            mongoengine.PointField: PointField,
             mongoengine.DynamicField: DynamicField,
             mongoengine.DecimalField: DecimalField,
             mongoengine.UUIDField: fields.CharField
@@ -154,7 +154,6 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
             attributes = attribute_dict[model_field.__class__]
             for attribute in attributes:
                 kwargs.update({attribute: getattr(model_field, attribute)})
-
         return field_mapping[model_field.__class__](**kwargs)
 
     def create(self, validated_attrs):
@@ -165,10 +164,10 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
         Rest framework built-in to_native + transform_object
         """
         #Dynamic Document Support
-        dynamic_fields = self.get_dynamic_fields(obj)
+        #dynamic_fields = self.get_dynamic_fields(obj)
         all_fields = OrderedDict()
         all_fields.update(self.fields)
-        all_fields.update(dynamic_fields)
+        #all_fields.update(dynamic_fields)
         ret = OrderedDict()
         _fields = [field for field in all_fields.values() if not field.write_only]
         for field in _fields:

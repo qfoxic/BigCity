@@ -2,6 +2,7 @@ from mfs.nodes.serializers import (NodeSerializer, ResourceSerializer)
 from nodes.models import Category, Advert
 from nodes.models import (AddressResource, BuildingPropertiesResource,
                           PriceResource, PosterResource)
+from mfs.common.lib import address_to_geo
 
 
 # Node.
@@ -22,7 +23,17 @@ class AddressResourceSerializer(ResourceSerializer):
     class Meta(ResourceSerializer.Meta):
         model = AddressResource
         fields = ResourceSerializer.Meta.fields + ('country', 'region',
-                                                   'city', 'street', 'location')
+                                                   'city', 'street')
+
+    def resolve_to_geo(self, *params):
+        self.validated_data['location'] = address_to_geo(*params)
+
+    def save(self, **kwargs):
+        data = self.validated_data
+        country, region, city, street = (data.get('country'), data.get('region'),
+                                         data.get('city'), data.get('street'))
+        self.resolve_to_geo(country, region, city, street)
+        return super(AddressResourceSerializer, self).save(**kwargs)
 
 
 class BuildingPropertiesResourceSerializer(ResourceSerializer):

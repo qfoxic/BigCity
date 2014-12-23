@@ -13,8 +13,8 @@ class MongoDocumentField(serializers.Field):
     MAX_RECURSION_DEPTH = 5  # default value of depth
 
     def __init__(self, *args, **kwargs):
-        if self.__class__.__name__ == 'GeoPointField':
-            pass#import pdb;pdb.set_trace()
+        #if self.__class__.__name__ == 'PointField':
+        #    import pdb;pdb.set_trace()
         try:
             self.model_field = kwargs.pop('model_field')
             self.depth = kwargs.pop('depth', self.MAX_RECURSION_DEPTH)
@@ -27,6 +27,8 @@ class MongoDocumentField(serializers.Field):
         return value
 
     def transform_document(self, document, depth):
+        #if self.__class__.__name__ == 'PointField':
+        #    import pdb;pdb.set_trace()
         data = {}
 
         # serialize each required field
@@ -45,6 +47,8 @@ class MongoDocumentField(serializers.Field):
         return data
 
     def transform_dict(self, obj, depth):
+        #if self.__class__.__name__ == 'PointField':
+        #    import pdb;pdb.set_trace()
         return dict([(key, self.transform_object(val, depth-1))
                      for key, val in obj.items()])
 
@@ -53,6 +57,8 @@ class MongoDocumentField(serializers.Field):
         Models to natives
         Recursion for (embedded) objects
         """
+        #if self.__class__.__name__ == 'PointField':
+        #    import pdb;pdb.set_trace()
         if isinstance(obj, BaseDocument):
             # Document, EmbeddedDocument
             if depth == 0:
@@ -105,12 +111,17 @@ class ListField(MongoDocumentField):
         return self.transform_object(obj, self.depth)
 
 
-class GeoPointField(MongoDocumentField):
+class PointField(MongoDocumentField):
 
-    type_label = 'GeoPointField'
+    type_label = 'PointField'
 
     def to_representation(self, value):
+        #import pdb;pdb.set_trace()
         return self.model_field.to_python(value)
+
+    def to_internal_value(self, obj):
+        #import pdb;pdb.set_trace()
+        return self.transform_object(obj, self.depth)
 
 
 class DecimalField(MongoDocumentField):

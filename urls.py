@@ -8,7 +8,7 @@ from mfs.nodes.views import NodesViewSet, ResourcesViewSet
 from users.views import RegularUserViewSet, RegularUserRegisterView
 from nodes.views import (CategoryViewSet, AdvertViewSet,
     BuildingPropertiesResourceViewSet, PriceResourceViewSet,
-    PosterResourceViewSet, AddressResourceViewSet)
+    PosterResourceViewSet, AddressResourceViewSet, PaginatedCategoriesView)
 
 
 drouter = routers.DefaultRouter()
@@ -36,7 +36,8 @@ urlpatterns = drouter.urls
 
 urlpatterns += patterns('',
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^token/', views.obtain_auth_token)
+    url(r'^token/', views.obtain_auth_token),
+    url(r'^categories/', PaginatedCategoriesView.as_view(), name='categories')
 )
 
 

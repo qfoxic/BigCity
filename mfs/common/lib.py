@@ -74,8 +74,10 @@ def jsonsuccess(msg):
     return {'success': msg}
 
 
-def jsonresult(item):
+def jsonresult(item, direct=False):
     try:
+        if direct:
+            return {'result': item}
         return {'result': json.loads(json.dumps(item))}
     except TypeError:
         return {'result': []}

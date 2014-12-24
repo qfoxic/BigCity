@@ -8,7 +8,6 @@ from django.db import models
 from django.forms import widgets
 from django.utils.datastructures import SortedDict
 from rest_framework.compat import OrderedDict
-from rest_framework.compat import get_concrete_model
 from .fields import (ReferenceField, ListField, EmbeddedDocumentField,
                      DynamicField, ObjectIdField, PointField, DecimalField)
 
@@ -72,16 +71,14 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
         return attrs
 
     def get_fields(self):
-        cls = self.Meta.model
-        opts = get_concrete_model(cls)
-        fields = list(copy.deepcopy(self._declared_fields))
-        fields += [getattr(opts, field) for field in cls._fields_ordered]
+        model = getattr(self.Meta, 'model')
+        fields = getattr(self.Meta, 'fields', None)
+        declared_fields = model._fields
 
         ret = SortedDict()
-        for model_field in fields:
-            field = self.get_field(model_field)
-            if field:
-                ret[model_field.name] = field
+        for field in fields:
+            if field in declared_fields:
+                ret[field] = self.get_field(declared_fields[field])
 
         read_only_fields = getattr(self.Meta, 'read_only_fields', None)
         if read_only_fields:
@@ -92,13 +89,6 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
                 ret[field_name].read_only = True
 
         return ret
-
-    #def get_dynamic_fields(self, obj):
-    #    dynamic_fields = {}
-    #    if obj is not None and obj._dynamic:
-    #        for key, value in obj._dynamic_fields.items():
-    #            dynamic_fields[key] = self.get_field(value)
-    #    return dynamic_fields
 
     def get_field(self, model_field):
         kwargs = {}
@@ -163,11 +153,8 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
         """
         Rest framework built-in to_native + transform_object
         """
-        #Dynamic Document Support
-        #dynamic_fields = self.get_dynamic_fields(obj)
         all_fields = OrderedDict()
         all_fields.update(self.fields)
-        #all_fields.update(dynamic_fields)
         ret = OrderedDict()
         _fields = [field for field in all_fields.values() if not field.write_only]
         for field in _fields:
@@ -178,20 +165,5 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
                 ret[field.field_name] = field.to_representation(attribute)
         return ret
 
-    def to_internal_value(self, data):
-        self._errors = {}
-
-        if data is not None:
-            attrs = self.restore_fields(data, files)
-            for key in data.keys():
-                if key not in attrs:
-                    attrs[key] = data[key]
-            if attrs is not None:
-                attrs = self.run_validation(attrs)
-        else:
-            self._errors['non_field_errors'] = ['No input provided']
-
-        if not self._errors:
-            return self.create(attrs)
 
 

@@ -10,12 +10,28 @@ class CategoryViewSet(NodesViewSet):
     manager_class = CategoryManager
 
 
-class PaginatedCategoriesView(ListAPIView):
+class CategoryListView(ListAPIView):
     paginate_by = None
     serializer_class = CategoryManager.serializer
 
     def get_queryset(self):
         return CategoryManager(self.request).categories_queryset()
+
+
+class PaginatedAdvertsByAddressView(ListAPIView):
+    serializer_class = AddressResourceManager.serializer
+
+    def get_queryset(self):
+        data = self.request.GET
+        kind = data.get('search', 'nearest')
+        if kind == 'nearest':
+            return AddressResourceManager(self.request).nearest_queryset()
+        elif kind == 'regions':
+            return AddressResourceManager(self.request).regions_queryset()
+        elif kind == 'cities':
+            return AddressResourceManager(self.request).cities_queryset()
+        elif kind == 'countries':
+            return AddressResourceManager(self.request).countries_queryset()
 
 
 class AdvertViewSet(NodesViewSet):

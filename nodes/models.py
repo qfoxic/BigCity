@@ -1,4 +1,4 @@
-from mongoengine import fields, Q, queryset_manager
+from mongoengine import fields
 from mfs.nodes.models import Node
 from mfs.nodes.models import Resource
 
@@ -27,26 +27,6 @@ class AddressResource(Resource):
     @classmethod
     def get_kind(cls):
         return 'address'
-
-    @queryset_manager
-    def nearest(cls, queryset, lon, lat, radius=1000**2):
-        # Select the count the nearest objects.
-        # radius in meters.
-        return queryset.filter(
-            loc__geo_within_center=[(lon, lat), radius]
-        )
-
-    @queryset_manager
-    def regions(cls, queryset, region):
-        return queryset.filter(region=region)
-
-    @queryset_manager
-    def countries(cls, queryset, country):
-        return queryset.filter(country=country)
-
-    @queryset_manager
-    def cities(cls, queryset, city):
-        return queryset.filter(city=city)
 
 
 class BuildingPropertiesResource(Resource):

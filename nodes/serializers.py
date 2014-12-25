@@ -23,7 +23,7 @@ class AddressResourceSerializer(ResourceSerializer):
     class Meta(ResourceSerializer.Meta):
         model = AddressResource
         fields = ResourceSerializer.Meta.fields + ('country', 'region',
-                                                   'city', 'street')
+                                                   'city', 'street', 'loc')
 
     def resolve_to_geo(self, *params):
         self.validated_data['location'] = address_to_geo(*params)

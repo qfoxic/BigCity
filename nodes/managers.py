@@ -7,17 +7,22 @@ from nodes.serializers import (CategorySerializer,
                                PosterResourceSerializer)
 
 
+def user_data(request):
+    user = request.user
+    uid, groups = 0, []
+    um = UsersManager(request)
+    if user.is_authenticated():
+        ures = um.data(pk=request.user.pk)
+        if not ures.get('error'):
+            uid, groups = user.pk, ures['result']['groups']
+    return uid, groups
+
+
 class CategoryManager(NodesManager):
     serializer = CategorySerializer
 
     def categories_queryset(self):
-        user = self.request.user
-        uid, groups = 0, []
-        um = UsersManager(self.request)
-        if user.is_authenticated():
-            ures = um.data(pk=self.request.user.pk)
-            if not ures.get('error'):
-                uid, groups = user.pk, ures['result']['groups']
+        uid, groups = user_data(self.request)
         queryset = self.serializer.Meta.model.nodes(
             uid, groups).only('parent', 'title', 'id', 'path')
         return queryset
@@ -29,6 +34,45 @@ class AdvertManager(NodesManager):
 
 class AddressResourceManager(ResourcesManager):
     serializer = AddressResourceSerializer
+
+    def nearest_queryset(self):
+        data = self.request.GET
+        try:
+            lon, lat, radius = (float(data.get('lon')), float(data.get('lat')),
+                                int(data.get('radius')))
+        except (TypeError, ValueError):
+            lon, lat, radius = 0.0, 0.0, 1000**2
+
+        uid, groups = user_data(self.request)
+        queryset = self.serializer.Meta.model.resources(
+            uid, groups).filter(
+            loc__geo_within_center=[(lon or 0.0, lat or 0.0), radius or 1000**2]
+        )
+        return queryset
+
+    def regions_queryset(self):
+        data = self.request.GET
+        regions = data.get('regions', '').split(',')
+        uid, groups = user_data(self.request)
+        queryset = self.serializer.Meta.model.resources(
+            uid, groups).filter(region__in=regions)
+        return queryset
+
+    def cities_queryset(self):
+        data = self.request.GET
+        cities = data.get('cities', '').split(',')
+        uid, groups = user_data(self.request)
+        queryset = self.serializer.Meta.model.resources(
+            uid, groups).filter(city__in=cities)
+        return queryset
+
+    def countries_queryset(self):
+        data = self.request.GET
+        countries = data.get('countries', '').split(',')
+        uid, groups = user_data(self.request)
+        queryset = self.serializer.Meta.model.resources(
+            uid, groups).filter(countries__in=countries)
+        return queryset
 
 
 class BuildingPropertiesResourceManager(ResourcesManager):

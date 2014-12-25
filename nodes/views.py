@@ -4,7 +4,6 @@ from nodes.managers import (CategoryManager, AdvertManager,
                             AddressResourceManager,
                             BuildingPropertiesResourceManager,
                             PriceResourceManager, PosterResourceManager)
-from nodes.filters import CategoryFilterBackend
 
 
 class CategoryViewSet(NodesViewSet):
@@ -14,7 +13,6 @@ class CategoryViewSet(NodesViewSet):
 class PaginatedCategoriesView(ListAPIView):
     paginate_by = None
     serializer_class = CategoryManager.serializer
-    filter_backends = (CategoryFilterBackend,)
 
     def get_queryset(self):
         return CategoryManager(self.request).categories_queryset()

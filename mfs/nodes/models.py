@@ -54,6 +54,9 @@ class Node(Document):
 
 
 class Resource(Document):
+    uid = fields.IntField(required=True, min_value=1)
+    perm = fields.StringField(default='666')
+    access_level = fields.IntField(required=True, min_value=1)
     kind = fields.StringField(max_length=50)
     # timestamp.
     created = fields.DateTimeField()
@@ -71,8 +74,17 @@ class Resource(Document):
         if not self.created:
             self.created = datetime.datetime.utcnow()
         self.kind = self.get_kind()
+        self.uid = self.parent.uid
+        self.perm = self.parent.perm
+        self.access_level = self.parent.access_level
         return super(Resource, self).save(*args, **kwargs)
 
     @classmethod
     def get_kind(cls):
         return cls.__name__.lower()
+
+    @queryset_manager
+    def resources(cls, queryset, uid, access_levels, kind=None):
+        return queryset.filter(
+            Q(kind=(kind or cls.get_kind())) | Q(uid=uid) | Q(access_level__in=access_levels)
+        ).where('((1*this.perm[0])&4) || ((1*this.perm[1])&4) || ((1*this.perm[2])&4)')

@@ -29,13 +29,24 @@ class AddressResource(Resource):
         return 'address'
 
     @queryset_manager
-    def nearest(cls, queryset, lon, lat, radius=1000**2, count=1000):
+    def nearest(cls, queryset, lon, lat, radius=1000**2):
         # Select the count the nearest objects.
         # radius in meters.
         return queryset.filter(
-            Q(kind=cls.get_kind()) | Q(loc__geo_within_center=[(lon, lat), radius])
-        ).limit(count)
-        # TODO. Perform check permissions with parent.
+            loc__geo_within_center=[(lon, lat), radius]
+        )
+
+    @queryset_manager
+    def regions(cls, queryset, region):
+        return queryset.filter(region=region)
+
+    @queryset_manager
+    def countries(cls, queryset, country):
+        return queryset.filter(country=country)
+
+    @queryset_manager
+    def cities(cls, queryset, city):
+        return queryset.filter(city=city)
 
 
 class BuildingPropertiesResource(Resource):

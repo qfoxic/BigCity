@@ -1,10 +1,6 @@
-from mfs.nodes.managers import NodesManager, ResourcesManager
+from mfs.nodes.managers import NodesManager
 from mfs.users.managers import UsersManager
-from nodes.serializers import (CategorySerializer,
-                               AdvertSerializer, AddressResourceSerializer,
-                               BuildingPropertiesResourceSerializer,
-                               PriceResourceSerializer,
-                               PosterResourceSerializer)
+from nodes.serializers import CategorySerializer, AdvertSerializer
 
 
 def user_data(request):
@@ -31,10 +27,6 @@ class CategoryManager(NodesManager):
 class AdvertManager(NodesManager):
     serializer = AdvertSerializer
 
-
-class AddressResourceManager(ResourcesManager):
-    serializer = AddressResourceSerializer
-
     def nearest_queryset(self):
         data = self.request.GET
         try:
@@ -44,7 +36,7 @@ class AddressResourceManager(ResourcesManager):
             lon, lat, radius = 0.0, 0.0, 1000**2
 
         uid, groups = user_data(self.request)
-        queryset = self.serializer.Meta.model.resources(
+        queryset = self.serializer.Meta.model.nodes(
             uid, groups).filter(
             loc__geo_within_center=[(lon or 0.0, lat or 0.0), radius or 1000**2]
         )
@@ -54,7 +46,7 @@ class AddressResourceManager(ResourcesManager):
         data = self.request.GET
         regions = data.get('regions', '').split(',')
         uid, groups = user_data(self.request)
-        queryset = self.serializer.Meta.model.resources(
+        queryset = self.serializer.Meta.model.nodes(
             uid, groups).filter(region__in=regions)
         return queryset
 
@@ -62,7 +54,7 @@ class AddressResourceManager(ResourcesManager):
         data = self.request.GET
         cities = data.get('cities', '').split(',')
         uid, groups = user_data(self.request)
-        queryset = self.serializer.Meta.model.resources(
+        queryset = self.serializer.Meta.model.nodes(
             uid, groups).filter(city__in=cities)
         return queryset
 
@@ -70,18 +62,7 @@ class AddressResourceManager(ResourcesManager):
         data = self.request.GET
         countries = data.get('countries', '').split(',')
         uid, groups = user_data(self.request)
-        queryset = self.serializer.Meta.model.resources(
+        queryset = self.serializer.Meta.model.nodes(
             uid, groups).filter(countries__in=countries)
         return queryset
 
-
-class BuildingPropertiesResourceManager(ResourcesManager):
-    serializer = BuildingPropertiesResourceSerializer
-
-
-class PriceResourceManager(ResourcesManager):
-    serializer = PriceResourceSerializer
-
-
-class PosterResourceManager(ResourcesManager):
-    serializer = PosterResourceSerializer

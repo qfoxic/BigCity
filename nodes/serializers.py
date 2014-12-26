@@ -1,7 +1,5 @@
-from mfs.nodes.serializers import (NodeSerializer, ResourceSerializer)
+from mfs.nodes.serializers import NodeSerializer
 from nodes.models import Category, Advert
-from nodes.models import (AddressResource, BuildingPropertiesResource,
-                          PriceResource, PosterResource)
 from mfs.common.lib import address_to_geo
 
 
@@ -15,43 +13,30 @@ class CategorySerializer(NodeSerializer):
 class AdvertSerializer(NodeSerializer):
     class Meta(NodeSerializer.Meta):
         model = Advert
-        fields = NodeSerializer.Meta.fields + ('title',)
-
-
-# Resources
-class AddressResourceSerializer(ResourceSerializer):
-    class Meta(ResourceSerializer.Meta):
-        model = AddressResource
-        fields = ResourceSerializer.Meta.fields + ('country', 'region',
-                                                   'city', 'street', 'loc')
+        fields = NodeSerializer.Meta.fields + ('title', 'country', 'region',
+                                               'city', 'street', 'loc',
+                                               'rooms', 'square_gen', 'floor',
+                                               'square_live', 'room_height',
+                                               'floors', 'wall_type',
+                                               'build_type', 'price', 'duration', 'text',
+                                               'build_vector')
 
     def resolve_to_geo(self, *params):
-        self.validated_data['location'] = address_to_geo(*params)
+        self.validated_data['loc'] = address_to_geo(*params)
+
+    def resolve_vector(self):
+        data = self.validated_data
+        data['build_vector'] = [
+            data['rooms'], data['square_gen'],
+            data['floor'], data['square_live'], data['room_height'], data['floors'],
+            data['build_type']
+        ]
 
     def save(self, **kwargs):
         data = self.validated_data
         country, region, city, street = (data.get('country'), data.get('region'),
                                          data.get('city'), data.get('street'))
         self.resolve_to_geo(country, region, city, street)
-        return super(AddressResourceSerializer, self).save(**kwargs)
+        self.resolve_vector()
+        return super(AdvertSerializer, self).save(**kwargs)
 
-
-class BuildingPropertiesResourceSerializer(ResourceSerializer):
-    class Meta(ResourceSerializer.Meta):
-        model = BuildingPropertiesResource
-        fields = ResourceSerializer.Meta.fields + ('rooms', 'square_gen', 'floor',
-                                                   'square_live', 'room_height',
-                                                   'floors', 'wall_type',
-                                                   'build_type')
-
-
-class PriceResourceSerializer(ResourceSerializer):
-    class Meta(ResourceSerializer.Meta):
-        model = PriceResource
-        fields = ResourceSerializer.Meta.fields + ('price', 'duration')
-
-
-class PosterResourceSerializer(ResourceSerializer):
-    class Meta(ResourceSerializer.Meta):
-        model = PosterResource
-        fields = ResourceSerializer.Meta.fields + ('title', 'text')

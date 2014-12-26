@@ -6,9 +6,8 @@ from mfs.users.views import UserLoginView, UserLogoutView
 from mfs.nodes.views import NodesViewSet, ResourcesViewSet
 
 from users.views import RegularUserViewSet, RegularUserRegisterView
-from nodes.views import (CategoryViewSet, AdvertViewSet,
-    BuildingPropertiesResourceViewSet, PriceResourceViewSet,
-    PosterResourceViewSet, AddressResourceViewSet, CategoryListView, PaginatedAdvertsByAddressView)
+from nodes.views import (CategoryViewSet, AdvertViewSet, CategoryListView,
+                         PaginatedAdvertsByAddressView)
 
 
 drouter = routers.DefaultRouter()
@@ -27,10 +26,6 @@ drouter.register(r'category', CategoryViewSet, base_name='category') # Node.
 
 # Advert url.
 drouter.register(r'advert', AdvertViewSet, base_name='advert') # Node.
-drouter.register(r'building', BuildingPropertiesResourceViewSet, base_name='building')
-drouter.register(r'address', AddressResourceViewSet, base_name='address')
-drouter.register(r'price', PriceResourceViewSet, base_name='price')
-drouter.register(r'poster', PosterResourceViewSet, base_name='poster')
 
 urlpatterns = drouter.urls
 

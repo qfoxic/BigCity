@@ -1,13 +1,14 @@
 from rest_framework.generics import ListAPIView
-from mfs.nodes.views import NodesViewSet, ResourcesViewSet
-from nodes.managers import (CategoryManager, AdvertManager,
-                            AddressResourceManager,
-                            BuildingPropertiesResourceManager,
-                            PriceResourceManager, PosterResourceManager)
+from mfs.nodes.views import NodesViewSet
+from nodes.managers import CategoryManager, AdvertManager
 
 
 class CategoryViewSet(NodesViewSet):
     manager_class = CategoryManager
+
+
+class AdvertViewSet(NodesViewSet):
+    manager_class = AdvertManager
 
 
 class CategoryListView(ListAPIView):
@@ -19,49 +20,22 @@ class CategoryListView(ListAPIView):
 
 
 class PaginatedAdvertsByAddressView(ListAPIView):
-    serializer_class = AddressResourceManager.serializer
+    serializer_class = AdvertManager.serializer
 
     def get_queryset(self):
         data = self.request.GET
-        kind = data.get('search', 'nearest')
-        if kind == 'nearest':
-            return AddressResourceManager(self.request).nearest_queryset()
-        elif kind == 'regions':
-            return AddressResourceManager(self.request).regions_queryset()
-        elif kind == 'cities':
-            return AddressResourceManager(self.request).cities_queryset()
-        elif kind == 'countries':
-            return AddressResourceManager(self.request).countries_queryset()
+        kind = data.get('search', 'near').split(',')
+        order = data.get('order', '-price') # Comma separated.
+        query = None
+        if 'near' in kind:
+            query = AdvertManager(self.request).nearest_queryset()
+        elif 'region' in kind:
+            query = AdvertManager(self.request).regions_queryset()
+        elif 'city' in kind:
+            query = AdvertManager(self.request).cities_queryset()
+        elif 'country' in kind:
+            query = AdvertManager(self.request).countries_queryset()
+        query.order_by(order)
+        return query
 
-
-class AdvertViewSet(NodesViewSet):
-    manager_class = AdvertManager
-
-
-class AddressResourceViewSet(ResourcesViewSet):
-    manager_class = AddressResourceManager
-
-    def get_node_manager(self, request):
-        return AdvertManager(request)
-
-
-class BuildingPropertiesResourceViewSet(ResourcesViewSet):
-    manager_class = BuildingPropertiesResourceManager
-
-    def get_node_manager(self, request):
-        return AdvertManager(request)
-
-
-class PriceResourceViewSet(ResourcesViewSet):
-    manager_class = PriceResourceManager
-
-    def get_node_manager(self, request):
-        return AdvertManager(request)
-
-
-class PosterResourceViewSet(ResourcesViewSet):
-    manager_class = PosterResourceManager
-
-    def get_node_manager(self, request):
-        return AdvertManager(request)
 

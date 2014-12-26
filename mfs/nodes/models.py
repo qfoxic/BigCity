@@ -55,7 +55,7 @@ class Node(Document):
 
 class Resource(Document):
     uid = fields.IntField(required=True, min_value=1)
-    perm = fields.StringField(default='666')
+    perm = fields.StringField(default=UMASK)
     access_level = fields.IntField(required=True, min_value=1)
     kind = fields.StringField(max_length=50)
     # timestamp.

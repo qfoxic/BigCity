@@ -19,8 +19,8 @@ class UsersManager(clib.BaseManager):
         user = authenticate(username=username, password=password)
         if user:
             login(request, user)
-            return True
-        return False
+            return self.data(pk=user.id)
+        return {}
 
     def add(self, **kwargs):
         res = super(UsersManager, self).add(**kwargs)

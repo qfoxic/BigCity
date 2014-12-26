@@ -42,7 +42,9 @@ class NodeTests(APITestCase):
         response = self.client.post('/user/{}/addgroup/'.format(uid),
                                     {'gid': gid}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        return gid
+        response = self.client.get('/user/{}/groups/'.format(uid), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        return [i[0] for i in response.data['result']]
 
     def _createTree(self, uid):
         node = {'uid': uid, 'perm': '666'}
@@ -72,28 +74,28 @@ class NodeTests(APITestCase):
     # Test sharing.
     def test_node_data(self):
         uid = self._createAndLoginUser('wwwbnv@uke.nee1')
-        gid = self._createAndAddGroup('test', uid)
+        gids = self._createAndAddGroup('test', uid)
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data['result']
         self.assertEqual(pid1, data['id'])
         self.assertEqual(uid, data['uid'])
-        self.assertEqual(gid, data['access_level'])
+        self.assertTrue(data['access_level'] in gids)
         self.assertEqual(None, data['parent'])
         response = self.client.get('/node/{}/'.format(pid2), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data['result']
         self.assertEqual(pid2, data['id'])
         self.assertEqual(uid, data['uid'])
-        self.assertEqual(gid, data['access_level'])
+        self.assertTrue(data['access_level'] in gids)
         self.assertEqual(pid1, data['parent'])
         response = self.client.get('/node/{}/'.format(pid3), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data['result']
         self.assertEqual(pid3, data['id'])
         self.assertEqual(uid, data['uid'])
-        self.assertEqual(gid, data['access_level'])
+        self.assertTrue(data['access_level'] in gids)
         self.assertEqual(pid2, data['parent'])
         self._removeNodes(pid1, pid2, pid3)
 

@@ -141,7 +141,7 @@ class UserTests(APITestCase):
         response = self.client.get('/user/{}/groups/'.format(user_id),
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(list(response.data['result']), [])
+        self.assertTrue(gid not in response.data['result'])
         self.client.login(username='wwwbnv@uke.nee', password='qwerty')
         response = self.client.delete('/user/{}/'.format(user_id),
                                       format='json')

@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
 import mfs.common.lib as clib
 from mfs.users.serializers import UserSerializer
+from django.contrib.auth.models import Group
+from mfs.common.constants import DEFAULT_GROUP
 
 
 class UsersManager(clib.BaseManager):
@@ -19,6 +21,14 @@ class UsersManager(clib.BaseManager):
             login(request, user)
             return True
         return False
+
+    def add(self, **kwargs):
+        res = super(UsersManager, self).add(**kwargs)
+        if res.get('error'):
+            return res
+        grp, _ = Group.objects.get_or_create(name=DEFAULT_GROUP)
+        self.add_group(res['result']['id'], grp.id)
+        return self.data(pk=res['result']['id'])
 
     def data(self, **kwargs):
         res = clib.get_obj(self.serializer, **kwargs)

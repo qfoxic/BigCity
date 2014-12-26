@@ -1,12 +1,12 @@
 import datetime
-
 from mongoengine import Document, fields, NULLIFY, CASCADE, queryset_manager, Q
+from mfs.common.constants import UMASK
 
 
 class Node(Document):
     uid = fields.IntField(required=True, min_value=1)
     #unix permission.
-    perm = fields.StringField(default='666')
+    perm = fields.StringField(default=UMASK)
     # dot separated path of entity's ids.
     path = fields.StringField(max_length=3000)
     kind = fields.StringField(max_length=50)

@@ -1,4 +1,7 @@
 from rest_framework import permissions
+from rest_framework.authtoken import views
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework import status
@@ -94,3 +97,13 @@ class UserLogoutView(vws.BaseViewSet):
         if res:
             return Response(res)
         return Response(res, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserTokenLoginView(views.ObtainAuthToken):
+    def post(self, request):
+        serializer = AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, _ = Token.objects.get_or_create(user=user)
+        user = usr.UsersManager(request).data(pk=user.id)
+        return Response({'token': token.key, 'user': user['result']})

@@ -1,8 +1,7 @@
-from rest_framework.authtoken import views
 from django.conf.urls import url, patterns, include
 from rest_framework import routers
 from mfs.groups.views import GroupViewSet
-from mfs.users.views import UserLoginView, UserLogoutView
+from mfs.users.views import UserLoginView, UserLogoutView, UserTokenLoginView
 from mfs.nodes.views import NodesViewSet, ResourcesViewSet
 
 from users.views import RegularUserViewSet, RegularUserRegisterView
@@ -31,7 +30,7 @@ urlpatterns = drouter.urls
 
 urlpatterns += patterns('',
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^token/', views.obtain_auth_token),
+    url(r'^token/', UserTokenLoginView.as_view(), name='token'),
     url(r'^categories/', CategoryListView.as_view(), name='categories'),
     url(r'^adverts/', PaginatedAdvertsByAddressView.as_view(), name='adverts'),
 )

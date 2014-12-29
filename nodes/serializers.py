@@ -7,7 +7,7 @@ from mfs.common.lib import address_to_geo
 class CategorySerializer(NodeSerializer):
     class Meta(NodeSerializer.Meta):
         model = Category
-        fields = ('id', 'parent', 'path', 'title', 'perm', 'uid', 'access_level')
+        fields = ('id', 'parent', 'path', 'title', 'perm', 'uid', 'gid')
 
 
 class AdvertSerializer(NodeSerializer):

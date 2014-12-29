@@ -18,8 +18,7 @@ class Node(Document):
     parent = fields.ReferenceField('self', reverse_delete_rule=NULLIFY)
     # Shared to uids.
     shared = fields.ListField()
-    # We can use access_levels instead of groups.
-    access_level = fields.IntField(required=True, min_value=1)
+    gid = fields.IntField(required=True, min_value=1)
 
     meta = {
         'allow_inheritance': True
@@ -47,16 +46,16 @@ class Node(Document):
         return cls.__name__.lower()
 
     @queryset_manager
-    def nodes(cls, queryset, uid, access_levels, kind=None):
+    def nodes(cls, queryset, uid, gids, kind=None):
         return queryset.filter(
-            Q(kind=(kind or cls.get_kind())) | Q(uid=uid) | Q(access_level__in=access_levels)
+            Q(kind=(kind or cls.get_kind())) | Q(uid=uid) | Q(gid__in=gids)
         ).where('((1*this.perm[0])&4) || ((1*this.perm[1])&4) || ((1*this.perm[2])&4)')
 
 
 class Resource(Document):
     uid = fields.IntField(required=True, min_value=1)
     perm = fields.StringField(default=UMASK)
-    access_level = fields.IntField(required=True, min_value=1)
+    gid = fields.IntField(required=True, min_value=1)
     kind = fields.StringField(max_length=50)
     # timestamp.
     created = fields.DateTimeField()
@@ -76,7 +75,7 @@ class Resource(Document):
         self.kind = self.get_kind()
         self.uid = self.parent.uid
         self.perm = self.parent.perm
-        self.access_level = self.parent.access_level
+        self.gid = self.parent.gid
         return super(Resource, self).save(*args, **kwargs)
 
     @classmethod
@@ -84,7 +83,7 @@ class Resource(Document):
         return cls.__name__.lower()
 
     @queryset_manager
-    def resources(cls, queryset, uid, access_levels, kind=None):
+    def resources(cls, queryset, uid, gids, kind=None):
         return queryset.filter(
-            Q(kind=(kind or cls.get_kind())) | Q(uid=uid) | Q(access_level__in=access_levels)
+            Q(kind=(kind or cls.get_kind())) | Q(uid=uid) | Q(gid__in=gids)
         ).where('((1*this.perm[0])&4) || ((1*this.perm[1])&4) || ((1*this.perm[2])&4)')

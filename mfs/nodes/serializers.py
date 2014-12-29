@@ -22,7 +22,7 @@ class NodeSerializer(MongoEngineModelSerializer):
         model = Node
         fields = ('id', 'uid', 'perm',
                   'created', 'updated', 'parent', 'shared',
-                  'access_level', 'path')
+                  'gid', 'path')
         read_only_fields = ('path',)
 
 

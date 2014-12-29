@@ -35,7 +35,6 @@ class Advert(Node):
 
     price = fields.DecimalField()
     # Price per duration. For instance, one day.
-    # In seconds. 0 - means doesn't have duration.
-    duration = fields.IntField(default=0)
+    finished = fields.DateTimeField()
 
     text = fields.StringField(max_length=5000)

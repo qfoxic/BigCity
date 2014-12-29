@@ -1,6 +1,7 @@
 import datetime
 from mongoengine import Document, fields, NULLIFY, CASCADE, queryset_manager, Q
 from mfs.common.constants import UMASK
+from mfs.common.search import search_nodes
 
 
 class Node(Document):
@@ -47,9 +48,7 @@ class Node(Document):
 
     @queryset_manager
     def nodes(cls, queryset, uid, gids, kind=None):
-        return queryset.filter(
-            Q(kind=(kind or cls.get_kind())) | Q(uid=uid) | Q(gid__in=gids)
-        ).where('((1*this.perm[0])&4) || ((1*this.perm[1])&4) || ((1*this.perm[2])&4)')
+        return search_nodes(queryset, kind or cls.get_kind(), uid, gids)
 
 
 class Resource(Document):
@@ -84,6 +83,4 @@ class Resource(Document):
 
     @queryset_manager
     def resources(cls, queryset, uid, gids, kind=None):
-        return queryset.filter(
-            Q(kind=(kind or cls.get_kind())) | Q(uid=uid) | Q(gid__in=gids)
-        ).where('((1*this.perm[0])&4) || ((1*this.perm[1])&4) || ((1*this.perm[2])&4)')
+        return search_nodes(queryset, kind or cls.get_kind(), uid, gids)

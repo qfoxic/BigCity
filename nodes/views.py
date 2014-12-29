@@ -24,18 +24,19 @@ class PaginatedAdvertsByAddressView(ListAPIView):
 
     def get_queryset(self):
         data = self.request.GET
-        kind = data.get('search', 'near').split(',')
-        order = data.get('order', '-price') # Comma separated.
+        search = data.get('search', 'near').split(',')
+        order = data.get('order', '').split(',') # Comma separated.
         query = None
-        if 'near' in kind:
+        if 'near' in search:
             query = AdvertManager(self.request).nearest_queryset()
-        elif 'region' in kind:
+        elif 'region' in search:
             query = AdvertManager(self.request).regions_queryset()
-        elif 'city' in kind:
+        elif 'city' in search:
             query = AdvertManager(self.request).cities_queryset()
-        elif 'country' in kind:
+        elif 'country' in search:
             query = AdvertManager(self.request).countries_queryset()
-        query.order_by(order)
+        if order:
+            query.order_by(*order)
         return query
 
 

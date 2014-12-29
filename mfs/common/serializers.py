@@ -1,4 +1,3 @@
-import copy
 import mongoengine
 
 from mongoengine.errors import ValidationError

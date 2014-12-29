@@ -1,3 +1,5 @@
+import datetime
+from mongoengine import Q
 from mfs.nodes.managers import NodesManager
 from mfs.users.managers import UsersManager
 from nodes.serializers import CategorySerializer, AdvertSerializer
@@ -27,6 +29,11 @@ class CategoryManager(NodesManager):
 class AdvertManager(NodesManager):
     serializer = AdvertSerializer
 
+    def _bquery(self, uid, groups):
+        return self.serializer.Meta.model.nodes(
+            uid, groups).filter(
+                Q(finished__gt=datetime.datetime.now()) | Q(finished__exists=False))
+
     def nearest_queryset(self):
         data = self.request.GET
         try:
@@ -36,8 +43,7 @@ class AdvertManager(NodesManager):
             lon, lat, radius = 0.0, 0.0, 1000**2
 
         uid, groups = user_data(self.request)
-        queryset = self.serializer.Meta.model.nodes(
-            uid, groups).filter(
+        queryset = self._bquery(uid, groups).filter(
             loc__geo_within_center=[(lon or 0.0, lat or 0.0), radius or 1000**2]
         )
         return queryset
@@ -46,23 +52,20 @@ class AdvertManager(NodesManager):
         data = self.request.GET
         regions = data.get('regions', '').split(',')
         uid, groups = user_data(self.request)
-        queryset = self.serializer.Meta.model.nodes(
-            uid, groups).filter(region__in=regions)
+        queryset = self._bquery(uid, groups).filter(region__in=regions)
         return queryset
 
     def cities_queryset(self):
         data = self.request.GET
         cities = data.get('cities', '').split(',')
         uid, groups = user_data(self.request)
-        queryset = self.serializer.Meta.model.nodes(
-            uid, groups).filter(city__in=cities)
+        queryset = self._bquery(uid, groups).filter(city__in=cities)
         return queryset
 
     def countries_queryset(self):
         data = self.request.GET
         countries = data.get('countries', '').split(',')
         uid, groups = user_data(self.request)
-        queryset = self.serializer.Meta.model.nodes(
-            uid, groups).filter(countries__in=countries)
+        queryset = self._bquery(uid, groups).filter(countries__in=countries)
         return queryset
 

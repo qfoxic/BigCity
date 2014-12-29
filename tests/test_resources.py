@@ -14,7 +14,7 @@ class ResourceTests(APITestCase):
     def tearDown(self):
         self.client.logout()
 
-    def _createAndLoginUser(self, username):
+    def _createUser(self, username):
         self.client.logout()
         data = {'username': username, 'email': username,
                 'first_name': 'tets', 'last_name': 'tetete',
@@ -22,12 +22,15 @@ class ResourceTests(APITestCase):
         response = self.client.post('/user/register/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         uid = response.data['result']['id']
+        return uid
+
+    def _loginUser(self, username):
         self.client.post('/login/', {'username': username,
                                      'password': '1234567890'},
                          format='json')
-        return uid
 
     def _createAndAddGroup(self, groupname, uid, create=True):
+        self.client.login(username='wwwbnv@uke.nee', password='qwerty')
         if create:
             grp_data = {'name': groupname}
             response = self.client.post('/group/', grp_data, format='json')
@@ -42,6 +45,7 @@ class ResourceTests(APITestCase):
         response = self.client.post('/user/{}/addgroup/'.format(uid),
                                     {'gid': gid}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.logout()
         return gid
 
     def _createTree(self, uid):
@@ -63,8 +67,9 @@ class ResourceTests(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_resource_create_correct_parent(self):
-        uid = self._createAndLoginUser('user@ukrrr.ntt')
+        uid = self._createUser('user@ukrrr.ntt')
         self._createAndAddGroup('test', uid)
+        self._loginUser('user@ukrrr.ntt')
         pid1, pid2 = self._createTree(uid)
         response = self.client.post('/resource/',
                                     {'parent': pid1}, format='json')
@@ -74,18 +79,21 @@ class ResourceTests(APITestCase):
         self._removeNodes(pid1, pid2)
 
     def test_resource_create_incorrect_parent(self):
-        self._createAndLoginUser('user@ukrrr.ntt')
+        self._createUser('user@ukrrr.ntt')
+        self._loginUser('user@ukrrr.ntt')
         response = self.client.post('/resource/',
                                     {'parent': '54704556e1382314feaea1ab'},
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_permissions_same_group(self):
-        uid = self._createAndLoginUser('user@ukrrr.ntt')
+        uid = self._createUser('user@ukrrr.ntt')
         self._createAndAddGroup('test', uid)
+        self._loginUser('user@ukrrr.ntt')
         pid1, pid2 = self._createTree(uid)
-        uid1 = self._createAndLoginUser('user1@ukrrr.ntt')
+        uid1 = self._createUser('user1@ukrrr.ntt')
         self._createAndAddGroup('test', uid1, False)
+        self._loginUser('user1@ukrrr.ntt')
         response = self.client.post('/resource/',
                                     {'parent': pid1}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -94,33 +102,38 @@ class ResourceTests(APITestCase):
         self._removeNodes(pid1, pid2)
 
     def test_permissions_diff_group_allow(self):
-        uid = self._createAndLoginUser('user@ukrrr.ntt')
+        uid = self._createUser('user@ukrrr.ntt')
         self._createAndAddGroup('test', uid)
+        self._loginUser('user@ukrrr.ntt')
         pid1, pid2 = self._createTree(uid)
-        uid1 = self._createAndLoginUser('user1@ukrrr.ntt')
+        uid1 = self._createUser('user1@ukrrr.ntt')
         self._createAndAddGroup('test1', uid1)
+        self._loginUser('user1@ukrrr.ntt')
         response = self.client.post('/resource/',
                                     {'parent': pid1}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self._removeNodes(pid1, pid2)
 
     def test_permissions_diff_group_deny(self):
-        uid = self._createAndLoginUser('user@ukrrr.ntt')
+        uid = self._createUser('user@ukrrr.ntt')
         self._createAndAddGroup('test', uid)
+        self._loginUser('user@ukrrr.ntt')
         pid1, pid2 = self._createTree(uid)
         response = self.client.put('/node/{}/'.format(pid1), {'perm': '222'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        uid1 = self._createAndLoginUser('user1@ukrrr.ntt')
+        uid1 = self._createUser('user1@ukrrr.ntt')
         self._createAndAddGroup('test1', uid1)
+        self._loginUser('user1@ukrrr.ntt')
         response = self.client.post('/resource/',
                                     {'parent': pid1}, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2)
 
     def test_data_id_perms_allow(self):
-        uid = self._createAndLoginUser('user@ukrrr.ntt')
+        uid = self._createUser('user@ukrrr.ntt')
         self._createAndAddGroup('test', uid)
+        self._loginUser('user@ukrrr.ntt')
         pid1, pid2 = self._createTree(uid)
         response = self.client.post('/resource/',
                                     {'parent': pid1}, format='json')
@@ -132,8 +145,9 @@ class ResourceTests(APITestCase):
         self._removeNodes(pid1, pid2)
 
     def test_data_id_perms_deny(self):
-        uid = self._createAndLoginUser('user@ukrrr.ntt')
+        uid = self._createUser('user@ukrrr.ntt')
         self._createAndAddGroup('test', uid)
+        self._loginUser('user@ukrrr.ntt')
         pid1, pid2 = self._createTree(uid)
         response = self.client.post('/resource/',
                                     {'parent': pid1}, format='json')
@@ -148,8 +162,9 @@ class ResourceTests(APITestCase):
         self._removeNodes(pid1, pid2)
 
     def test_data_tag_perms_allow(self):
-        uid = self._createAndLoginUser('user@ukrrr.ntt')
+        uid = self._createUser('user@ukrrr.ntt')
         self._createAndAddGroup('test', uid)
+        self._loginUser('user@ukrrr.ntt')
         pid1, pid2 = self._createTree(uid)
         response = self.client.post('/resource/',
                                     {'parent': pid1}, format='json')
@@ -163,8 +178,9 @@ class ResourceTests(APITestCase):
         self._removeNodes(pid1, pid2)
 
     def test_data_tag_perms_deny(self):
-        uid = self._createAndLoginUser('user@ukrrr.ntt')
+        uid = self._createUser('user@ukrrr.ntt')
         self._createAndAddGroup('test', uid)
+        self._loginUser('user@ukrrr.ntt')
         pid1, pid2 = self._createTree(uid)
         response = self.client.post('/resource/',
                                     {'parent': pid1}, format='json')
@@ -179,8 +195,9 @@ class ResourceTests(APITestCase):
         self._removeNodes(pid1, pid2)
 
     def test_rm_reso_perms_allow(self):
-        uid = self._createAndLoginUser('user@ukrrr.ntt')
+        uid = self._createUser('user@ukrrr.ntt')
         self._createAndAddGroup('test', uid)
+        self._loginUser('user@ukrrr.ntt')
         pid1, pid2 = self._createTree(uid)
         response = self.client.post('/resource/',
                                     {'parent': pid1},
@@ -193,8 +210,9 @@ class ResourceTests(APITestCase):
         self._removeNodes(pid1, pid2)
 
     def test_rm_reso_perms_deny(self):
-        uid = self._createAndLoginUser('user@ukrrr.ntt')
+        uid = self._createUser('user@ukrrr.ntt')
         self._createAndAddGroup('test', uid)
+        self._loginUser('user@ukrrr.ntt')
         pid1, pid2 = self._createTree(uid)
         response = self.client.post('/resource/',
                                     {'parent': pid1},

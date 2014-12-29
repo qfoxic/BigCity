@@ -14,7 +14,7 @@ class NodeTests(APITestCase):
     def tearDown(self):
         self.client.logout()
 
-    def _createAndLoginUser(self, username):
+    def _createUser(self, username):
         self.client.logout()
         data = {'username': username, 'email': username,
                 'first_name': 'tets', 'last_name': 'tetete',
@@ -22,12 +22,15 @@ class NodeTests(APITestCase):
         response = self.client.post('/user/register/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         uid = response.data['result']['id']
+        return uid
+
+    def _loginUser(self, username):
         self.client.post('/login/', {'username': username,
                                      'password': '1234567890'},
                          format='json')
-        return uid
 
     def _createAndAddGroup(self, groupname, uid, create=True):
+        self.client.login(username='wwwbnv@uke.nee', password='qwerty')
         if create:
             grp_data = {'name': groupname}
             response = self.client.post('/group/', grp_data, format='json')
@@ -44,6 +47,7 @@ class NodeTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.get('/user/{}/groups/'.format(uid), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.logout()
         return [i[0] for i in response.data['result']]
 
     def _createTree(self, uid):
@@ -73,8 +77,9 @@ class NodeTests(APITestCase):
     # Access to nodes - change owner, change group.
     # Test sharing.
     def test_node_data(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         gids = self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -100,8 +105,9 @@ class NodeTests(APITestCase):
         self._removeNodes(pid1, pid2, pid3)
 
     def test_node_path(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -118,8 +124,9 @@ class NodeTests(APITestCase):
         self._removeNodes(pid1, pid2, pid3)
 
     def test_update_node(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -132,8 +139,9 @@ class NodeTests(APITestCase):
         self._removeNodes(pid1, pid2, pid3)
 
     def test_owner_read_perm(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -145,8 +153,9 @@ class NodeTests(APITestCase):
         self._removeNodes(pid1, pid2, pid3)
 
     def test_same_group_read_perm_deny(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -154,15 +163,17 @@ class NodeTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid2 = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test', uid2, create=False)
+        self._loginUser('wwwbnv@uke.nee12')
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_diff_group_read_perm_deny(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -170,15 +181,17 @@ class NodeTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid2 = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test1', uid2)
+        self._loginUser('wwwbnv@uke.nee12')
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_same_group_read_perm_access(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -186,15 +199,17 @@ class NodeTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid2 = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test', uid2, create=False)
+        self._loginUser('wwwbnv@uke.nee12')
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_diff_group_read_perm_access(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -202,15 +217,17 @@ class NodeTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee112')
+        uid2 = self._createUser('wwwbnv@uke.nee112')
         self._createAndAddGroup('test1', uid2)
+        self._loginUser('wwwbnv@uke.nee112')
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_same_group_write_perm_deny(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -218,16 +235,18 @@ class NodeTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid2 = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test', uid2, create=False)
+        self._loginUser('wwwbnv@uke.nee12')
         response = self.client.put('/node/{}/'.format(pid1), {'perm': '444'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_diff_group_write_perm_deny(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -235,16 +254,18 @@ class NodeTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid2 = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test1', uid2)
+        self._loginUser('wwwbnv@uke.nee12')
         response = self.client.put('/node/{}/'.format(pid1), {'perm': '444'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_same_group_write_perm_access(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -252,15 +273,17 @@ class NodeTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid2 = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test', uid2, create=False)
+        self._loginUser('wwwbnv@uke.nee12')
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_diff_group_write_perm_access(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -268,74 +291,71 @@ class NodeTests(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid2 = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test1', uid2)
+        self._loginUser('wwwbnv@uke.nee12')
         response = self.client.get('/node/{}/'.format(pid1), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_same_group_delete_perm_access(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid2 = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test', uid2, create=False)
+        self._loginUser('wwwbnv@uke.nee12')
         for p in [pid1, pid2, pid3]:
             response = self.client.delete('/node/{}/'.format(p))
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_diff_group_delete_perm_access(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid2 = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test1', uid2)
+        self._loginUser('wwwbnv@uke.nee12')
         for p in [pid1, pid2, pid3]:
             response = self.client.delete('/node/{}/'.format(p))
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_same_group_delete_perm_deny(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee12')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.put('/node/{}/'.format(pid1), {'perm': '111'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid2 = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid2, create=False)
+        self._loginUser('wwwbnv@uke.nee1')
         for p in [pid1]:
             response = self.client.delete('/node/{}/'.format(p))
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
 
     def test_diff_group_delete_perm_deny(self):
-        uid = self._createAndLoginUser('wwwbnv@uke.nee1')
+        uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
         response = self.client.put('/node/{}/'.format(pid1), {'perm': '111'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.get('/logout/')
-        uid2 = self._createAndLoginUser('wwwbnv@uke.nee12')
+        uid2 = self._createUser('wwwbnv@uke.nee12')
         self._createAndAddGroup('test1', uid2)
+        self._loginUser('wwwbnv@uke.nee12')
         for p in [pid1]:
             response = self.client.delete('/node/{}/'.format(p))
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self._removeNodes(pid1, pid2, pid3)
-
-
-
-
-
-
-
-
-
-
-
-
 
 

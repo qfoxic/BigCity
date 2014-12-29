@@ -9,13 +9,14 @@ def has_group(user, group):
 
 
 def check_admin(user):
-    if not has_group(user, ADMIN_GROUP):
+    if not (user.is_staff or has_group(user, ADMIN_GROUP)):
         raise PermissionDenied
 
 
 class IsAdminGroup(BasePermission):
     def has_permission(self, request, view):
-        return has_group(request.user, ADMIN_GROUP)
+        check_admin(request.user)
+        return True
 
 
 class IsAuthenticatedOrOwner(BasePermission):

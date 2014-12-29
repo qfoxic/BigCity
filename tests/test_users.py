@@ -151,7 +151,7 @@ class UserTests(APITestCase):
         self.client.get('/logout/')
         data = {'name': 'test'}
         response = self.client.post('/group/', data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         response = self.client.post('/login/', {'username': 'wwwbnv@uke.nee',
                                                 'password': 'qwerty'},
                                     format='json')
@@ -164,7 +164,7 @@ class UserTests(APITestCase):
         self.client.get('/logout/')
         data = {'name': 'test'}
         response = self.client.post('/group/', data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         response = self.client.post('/login/', {'username': 'wwwbnv@uke.nee',
                                                 'password': 'qwer'},
                                     format='json')

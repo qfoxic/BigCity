@@ -3,16 +3,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from rest_framework import status
 
-import mfs.groups.managers as grps
 import mfs.nodes.managers as nds
 import mfs.users.managers as usr
 import mfs.common.views as vws
 import mfs.common.lib as clib
 import mfs.common.constants as co
-import mfs.common.permissions as perms
 
 
-# TODO. Add change group functionality. ONly admins can change groups for a node.
 class NodesViewSet(vws.BaseViewSet):
     permission_classes = [permissions.IsAuthenticated,]
     manager_class = nds.NodesManager
@@ -84,12 +81,6 @@ class NodesViewSet(vws.BaseViewSet):
                                      kind=kind,
                                      cast=True,
                                      many=True))
-
-    @detail_route()
-    def chgroup(self, request, pk=None):
-        perms.check_admin(request.user)
-        gdata = grps.GroupManager(request).data(pk=request.data.get('gid'))
-        return Response(data=self.manager.upd(pk=pk, gid=gdata['result']['id']))
 
 
 class ResourcesViewSet(vws.BaseViewSet):

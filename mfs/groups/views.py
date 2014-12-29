@@ -8,8 +8,7 @@ from mfs.common.permissions import IsAdminGroup
 
 
 class GroupViewSet(BaseViewSet):
-    #permission_classes = [IsAdminGroup, permissions.IsAuthenticated]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminGroup, permissions.IsAuthenticated]
     manager_class = grp.GroupManager
 
     def list(self, request):

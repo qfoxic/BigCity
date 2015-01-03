@@ -1,7 +1,7 @@
 import datetime
-from mongoengine import Document, fields, NULLIFY, CASCADE, queryset_manager, Q
+from mongoengine import Document, fields, NULLIFY, CASCADE, queryset_manager
 from mfs.common.constants import UMASK
-from mfs.common.search import search_nodes
+from mfs.common.search import search_nodes, search_children
 
 
 class Node(Document):
@@ -50,7 +50,12 @@ class Node(Document):
     def nodes(cls, queryset, uid, gids, kind=None):
         return search_nodes(queryset, kind or cls.get_kind(), uid, gids)
 
+    @queryset_manager
+    def children(cls, queryset, uid, gids, parent_id, kind=None):
+        return search_children(queryset, kind, uid, gids, parent_id)
 
+
+# TODO. Rename to assets and add support of file fields.
 class Resource(Document):
     uid = fields.IntField(required=True, min_value=1)
     perm = fields.StringField(default=UMASK)

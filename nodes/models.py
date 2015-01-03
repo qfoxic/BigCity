@@ -30,9 +30,6 @@ class Advert(Node):
                                 required=True, default=WALL_TYPES[0][0])
     build_type = fields.IntField(choices=BUILD_TYPES,
                                  required=True, default=BUILD_TYPES[0][0])
-    # TODO. Calculate it dynamically
-    build_vector = fields.ListField(required=True)
-
     price = fields.DecimalField()
     # Price per duration. For instance, one day.
     finished = fields.DateTimeField()

@@ -1,6 +1,8 @@
 from rest_framework.generics import ListAPIView
 from mfs.nodes.views import NodesViewSet
+from mfs.common.search import MongoSearchFilter
 from nodes.managers import CategoryManager, AdvertManager
+
 
 
 class CategoryViewSet(NodesViewSet):
@@ -21,6 +23,9 @@ class CategoryListView(ListAPIView):
 
 class PaginatedAdvertsByAddressView(ListAPIView):
     serializer_class = AdvertManager.serializer
+    filter_backends = (MongoSearchFilter,)
+    search_fields = ('rooms', 'square_gen', 'square_live', 'room_height',
+                     'floors', 'floor', 'wall_type', 'build_type', 'price')
 
     def get_queryset(self):
         data = self.request.GET

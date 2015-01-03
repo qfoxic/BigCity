@@ -18,25 +18,18 @@ class AdvertSerializer(NodeSerializer):
                                                'rooms', 'square_gen', 'floor',
                                                'square_live', 'room_height',
                                                'floors', 'wall_type',
-                                               'build_type', 'price', 'duration', 'text',
+                                               'build_type', 'price',
+                                               'finished', 'text',
                                                'build_vector')
 
     def resolve_to_geo(self, *params):
         self.validated_data['loc'] = address_to_geo(*params)
 
-    def resolve_vector(self):
-        data = self.validated_data
-        data['build_vector'] = [
-            data['rooms'], data['square_gen'],
-            data['floor'], data['square_live'], data['room_height'], data['floors'],
-            data['build_type']
-        ]
-
     def save(self, **kwargs):
         data = self.validated_data
-        country, region, city, street = (data.get('country'), data.get('region'),
+        country, region, city, street = (data.get('country'),
+                                         data.get('region'),
                                          data.get('city'), data.get('street'))
         self.resolve_to_geo(country, region, city, street)
-        self.resolve_vector()
         return super(AdvertSerializer, self).save(**kwargs)
 

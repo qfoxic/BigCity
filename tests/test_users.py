@@ -206,3 +206,101 @@ class UserTests(APITestCase):
                                       format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_upd_groups(self):
+        gids = []
+        for name in ['test', 'test1', 'test2', 'test3']:
+            response = self.client.post('/group/', {'name': name},
+                                        format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            gids.append(response.data['result']['id'])
+        gid, gid1, gid2, gid3 = gids
+        udata = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                 'first_name': 'tets', 'last_name': 'tetete',
+                 'resume': 'super_file', 'password': '1234567890'}
+        response = self.client.post('/user/register/', udata, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user_id = response.data['result']['id']
+        response = self.client.post('/user/{}/addgroup/'.format(user_id),
+                                    {'gid': gid}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.post('/user/{}/addgroup/'.format(user_id),
+                                    {'gid': gid1}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get('/user/{}/groups/'.format(user_id),
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['result'][0][0] in (gid, gid1))
+        self.assertTrue(response.data['result'][1][0] in (gid, gid1))
+        response = self.client.post('/user/{}/updgroups/'.format(user_id),
+                                    {'gids': [gid2, gid3]}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        res = response.data['result']
+        self.assertEqual(res['added'], [gid2, gid3])
+        self.assertEqual(res['failed'], [])
+        self.assertTrue(gid in res['removed'] and gid1 in res['removed'])
+
+    def test_upd_groups_failed(self):
+        gids = []
+        for name in ['test', 'test1', 'test2']:
+            response = self.client.post('/group/', {'name': name},
+                                        format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            gids.append(response.data['result']['id'])
+        gid, gid1, gid2 = gids
+        udata = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                 'first_name': 'tets', 'last_name': 'tetete',
+                 'resume': 'super_file', 'password': '1234567890'}
+        response = self.client.post('/user/register/', udata, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user_id = response.data['result']['id']
+        response = self.client.post('/user/{}/addgroup/'.format(user_id),
+                                    {'gid': gid}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.post('/user/{}/addgroup/'.format(user_id),
+                                    {'gid': gid1}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get('/user/{}/groups/'.format(user_id),
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['result'][0][0] in (gid, gid1))
+        self.assertTrue(response.data['result'][1][0] in (gid, gid1))
+        response = self.client.post('/user/{}/updgroups/'.format(user_id),
+                                    {'gids': [gid2, 123, 1234]}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        res = response.data['result']
+        self.assertEqual(res['added'], [gid2])
+        self.assertEqual(res['failed'], [123, 1234])
+        self.assertTrue(gid in res['removed'] and gid1 in res['removed'])
+
+    def test_upd_groups_all_failed(self):
+        gids = []
+        for name in ['test', 'test1']:
+            response = self.client.post('/group/', {'name': name},
+                                        format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            gids.append(response.data['result']['id'])
+        gid, gid1 = gids
+        udata = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                 'first_name': 'tets', 'last_name': 'tetete',
+                 'resume': 'super_file', 'password': '1234567890'}
+        response = self.client.post('/user/register/', udata, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user_id = response.data['result']['id']
+        response = self.client.post('/user/{}/addgroup/'.format(user_id),
+                                    {'gid': gid}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.post('/user/{}/addgroup/'.format(user_id),
+                                    {'gid': gid1}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get('/user/{}/groups/'.format(user_id),
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['result'][0][0] in (gid, gid1))
+        self.assertTrue(response.data['result'][1][0] in (gid, gid1))
+        response = self.client.post('/user/{}/updgroups/'.format(user_id),
+                                    {'gids': [123, 1234]}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        res = response.data['result']
+        self.assertEqual(res['added'], [])
+        self.assertEqual(res['removed'], [])
+        self.assertEqual(res['failed'], [123, 1234])

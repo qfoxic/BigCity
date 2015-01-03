@@ -48,6 +48,36 @@ class UserViewSet(vws.BaseViewSet):
         return Response(data=self.manager.add_group(pk, gid))
 
     @detail_route(methods=['post'])
+    def updgroups(self, request, pk=None):
+        """Remove all user groups and add new ones."""
+        gids = request.data.get('gids')
+        group_manager = grp.GroupManager(request)
+        ugids = self.manager.groups(pk)['result']
+        added, failed, removed = [], [], []
+        for gid in gids:
+            try:
+                group_manager.data(pk=gid)
+            except Exception:
+                failed.append(gid)
+                continue
+            self.manager.add_group(pk, gid)
+            added.append(gid)
+        if added:
+            for ugid, _ in ugids:
+                res = self.manager.rm_group(pk, ugid)
+                if res.get('success'):
+                    removed.append(ugid)
+        res = self.manager.groups(pk)
+        gids = res['result']
+        res['result'] = {
+            'gids': gids,
+            'added': added,
+            'failed': failed,
+            'removed': removed
+        }
+        return Response(data=res)
+
+    @detail_route(methods=['post'])
     def rmgroup(self, request, pk=None):
         gid = request.data.get('gid')
         group_manager = grp.GroupManager(request)

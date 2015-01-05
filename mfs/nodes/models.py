@@ -22,7 +22,11 @@ class Node(Document):
     gid = fields.IntField(required=True, min_value=1)
 
     meta = {
-        'allow_inheritance': True
+        'allow_inheritance': True,
+        'indexes': [('kind', 'uid', 'gid'),
+                    ('uid', 'gid'),
+                    ('kind', 'uid', 'gid', 'parent'),
+                    ('kind', 'uid', 'gid', 'path')],
     }
 
     def save(self, *args, **kwargs):
@@ -51,8 +55,8 @@ class Node(Document):
         return search_nodes(queryset, kind or cls.get_kind(), uid, gids)
 
     @queryset_manager
-    def children(cls, queryset, uid, gids, parent_id, kind=None):
-        return search_children(queryset, kind, uid, gids, parent_id)
+    def children(cls, queryset, uid, gids, pid, direct=True, kind=None):
+        return search_children(queryset, kind or cls.get_kind(), uid, gids, pid, direct)
 
 
 # TODO. Rename to assets and add support of file fields.

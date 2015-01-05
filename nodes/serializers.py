@@ -27,9 +27,10 @@ class AdvertSerializer(NodeSerializer):
 
     def save(self, **kwargs):
         data = self.validated_data
-        country, region, city, street = (data.get('country'),
-                                         data.get('region'),
-                                         data.get('city'), data.get('street'))
+        country, region, city, street = (data.get('country', ''),
+                                         data.get('region', ''),
+                                         data.get('city', ''),
+                                         data.get('street', ''))
         self.resolve_to_geo(country, region, city, street)
         return super(AdvertSerializer, self).save(**kwargs)
 

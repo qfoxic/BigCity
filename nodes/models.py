@@ -1,4 +1,4 @@
-from mongoengine import fields
+from mongoengine import fields, NULLIFY, CASCADE
 from mfs.nodes.models import Node
 
 
@@ -8,10 +8,12 @@ BUILD_TYPES = ((0, 'New'), (1, 'Secondary'),)
 
 # Nodes.
 class Category(Node):
+    parent = fields.ReferenceField('Category', reverse_delete_rule=NULLIFY)
     title = fields.StringField(required=True, max_length=3000)
 
 
 class Advert(Node):
+    parent = fields.ReferenceField('Category', reverse_delete_rule=CASCADE)
     title = fields.StringField(required=True, max_length=300)
 
     loc = fields.PointField(required=True, default=[0.0, 0.0])

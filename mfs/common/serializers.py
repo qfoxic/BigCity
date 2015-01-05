@@ -6,9 +6,9 @@ from rest_framework import fields
 from django.db import models
 from django.forms import widgets
 from django.utils.datastructures import SortedDict
-from rest_framework.compat import OrderedDict
 from .fields import (ReferenceField, ListField, EmbeddedDocumentField,
-                     DynamicField, ObjectIdField, PointField, DecimalField)
+                     DynamicField, ObjectIdField, PointField, DecimalField,
+                     DateTimeField)
 
 
 kinds_registry = {}
@@ -30,7 +30,7 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
 
         return super(MongoEngineModelSerializer, self).__init__(
             instance, data, **kwargs)
-
+    #TODO. Investigate possibility to remove that function.
     def run_validation(self, attrs):
         """
         Rest Framework built-in validation + related model validations
@@ -39,7 +39,6 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
         for field_name, field in self.fields.items():
             if field_name in self._errors:
                 continue
-
             source = field.source or field_name
             if self.partial and source not in attrs:
                 continue
@@ -49,11 +48,10 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
                     field.model_field.validate(attrs[field_name])
                 except ValidationError as err:
                     self._errors[field_name] = str(err)
-
             try:
                 validate_method = getattr(self, 'validate_%s' % field_name, None)
                 if validate_method:
-                    attrs = validate_method(attrs, source)
+                    attrs[field_name] = validate_method(attrs[field_name])
             except serializers.ValidationError as err:
                 self._errors[field_name] = self._errors.get(field_name, []) + list(err.messages)
 
@@ -95,7 +93,7 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
         if model_field.__class__ in (mongoengine.ReferenceField, mongoengine.EmbeddedDocumentField,
                                      mongoengine.ListField, mongoengine.DynamicField,
                                      mongoengine.ObjectIdField, mongoengine.PointField,
-                                     mongoengine.DecimalField):
+                                     mongoengine.DecimalField, mongoengine.DateTimeField):
             kwargs['model_field'] = model_field
             kwargs['depth'] = self.Meta.depth
 
@@ -115,7 +113,7 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
         field_mapping = {
             mongoengine.FloatField: fields.FloatField,
             mongoengine.IntField: fields.IntegerField,
-            mongoengine.DateTimeField: fields.DateTimeField,
+            mongoengine.DateTimeField: DateTimeField,
             mongoengine.EmailField: fields.EmailField,
             mongoengine.URLField: fields.URLField,
             mongoengine.StringField: fields.CharField,
@@ -147,22 +145,5 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
 
     def create(self, validated_attrs):
         return self.Meta.model.objects.create(**validated_attrs)
-
-    def to_representation(self, obj):
-        """
-        Rest framework built-in to_native + transform_object
-        """
-        all_fields = OrderedDict()
-        all_fields.update(self.fields)
-        ret = OrderedDict()
-        _fields = [field for field in all_fields.values() if not field.write_only]
-        for field in _fields:
-            attribute = field.get_attribute(obj)
-            if attribute is None:
-                ret[field.field_name] = None
-            else:
-                ret[field.field_name] = field.to_representation(attribute)
-        return ret
-
 
 

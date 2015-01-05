@@ -51,6 +51,14 @@ class NodeTests(APITestCase):
         return [i[0] for i in response.data['result']]
 
     def _createTree(self, uid):
+        nod = {'uid': uid, 'perm': '666'}
+        response = self.client.post('/node/', nod, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        npid = response.data['result']['id']
+        node = {'uid': uid, 'perm': '666', 'title': 'Category1', 'parent': npid}
+        response = self.client.post('/category/', node, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
         node = {'uid': uid, 'perm': '666', 'title': 'Category1'}
         response = self.client.post('/category/', node, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

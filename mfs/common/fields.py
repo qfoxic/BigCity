@@ -6,7 +6,7 @@ from mongoengine.base.document import BaseDocument
 from mongoengine.document import Document
 from rest_framework import serializers
 from mongoengine.fields import ObjectId
-from datetime import date
+from datetime import date, datetime, time
 
 
 class MongoDocumentField(serializers.Field):
@@ -187,3 +187,48 @@ class ObjectIdField(MongoDocumentField):
 
     def to_internal_value(self, value):
         return self.to_mongo(value)
+
+
+class DateTimeField(MongoDocumentField):
+    """A field wrapper around MongoDB's ObjectIds.
+    """
+    type_label = 'DateTimeField'
+
+    def to_representation(self, value):
+        try:
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        except AttributeError:
+            return value
+
+    def to_mongo(self, value):
+        # split usecs, because they are not recognized by strptime.
+        if '.' in value:
+            try:
+                value, usecs = value.split('.')
+                usecs = int(usecs)
+            except ValueError:
+                return None
+        else:
+            usecs = 0
+        kwargs = {'microsecond': usecs}
+        try:  # Seconds are optional, so try converting seconds first.
+            return datetime.datetime(*time.strptime(value,
+                                     '%Y-%m-%d %H:%M:%S')[:6], **kwargs)
+        except ValueError:
+            pass
+        try:  # Try without seconds.
+            return datetime.datetime(*time.strptime(value,
+                                     '%Y-%m-%d %H:%M')[:5], **kwargs)
+        except ValueError:  # Try without hour/minutes/seconds.
+            pass
+        try:
+            return datetime.datetime(*time.strptime(value,
+                                     '%Y-%m-%d')[:3], **kwargs)
+        except ValueError:
+            pass
+        return value
+
+    def to_internal_value(self, value):
+        return self.to_mongo(value)
+
+

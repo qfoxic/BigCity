@@ -1,7 +1,8 @@
 import datetime
-from mongoengine import Q
+from mongoengine import Q, ValidationError
 from mfs.nodes.managers import NodesManager
 from mfs.users.managers import UsersManager
+from mfs.common.lib import jsonerror
 from nodes.serializers import CategorySerializer, AdvertSerializer
 
 
@@ -12,12 +13,18 @@ def user_data(request):
     if user.is_authenticated():
         ures = um.data(pk=request.user.pk)
         if not ures.get('error'):
-            uid, groups = user.pk, ures['result']['groups']
+            uid, groups = user.pk, [i[0] for i in ures['result']['groups']]
     return uid, groups
 
 
 class CategoryManager(NodesManager):
     serializer = CategorySerializer
+
+    def add(self, **kwargs):
+        try:
+            return super(CategoryManager, self).add(**kwargs)
+        except ValidationError:
+            return jsonerror('Parent node must be Category.')
 
     def categories_queryset(self):
         uid, groups = user_data(self.request)
@@ -29,43 +36,64 @@ class CategoryManager(NodesManager):
 class AdvertManager(NodesManager):
     serializer = AdvertSerializer
 
-    def _bquery(self, uid, groups):
-        return self.serializer.Meta.model.nodes(
-            uid, groups).filter(
+    def add(self, **kwargs):
+        try:
+            return super(AdvertManager, self).add(**kwargs)
+        except ValidationError:
+            return jsonerror('Parent node must be Category.')
+
+    def _bquery(self, uid, groups, pid):
+        return self.serializer.Meta.model.children(
+            uid, groups, pid).filter(
                 Q(finished__gt=datetime.datetime.now()) | Q(finished__exists=False))
 
-    def nearest_queryset(self):
+    def nearest_queryset(self, pid):
         data = self.request.GET
         try:
-            lon, lat, radius = (float(data.get('lon')), float(data.get('lat')),
-                                int(data.get('radius')))
+            lon, lat = (float(data.get('lon', 0.0)),
+                        float(data.get('lat', 0.0)))
         except (TypeError, ValueError):
-            lon, lat, radius = 0.0, 0.0, 1000**2
+            lon, lat = 0.0, 0.0
 
         uid, groups = user_data(self.request)
-        queryset = self._bquery(uid, groups).filter(
-            loc__geo_within_center=[(lon or 0.0, lat or 0.0), radius or 1000**2]
+        queryset = self._bquery(uid, groups, pid).filter(
+            loc__near=[lon, lat]
         )
         return queryset
 
-    def regions_queryset(self):
+    def within_queryset(self, pid):
+        data = self.request.GET
+        try:
+            lon, lat, radius = (float(data.get('lon', 0.0)),
+                                float(data.get('lat', 0.0)),
+                                float(data.get('radius', 10.0)))
+        except (TypeError, ValueError):
+            lon, lat, radius = 0.0, 0.0, 10.0
+
+        uid, groups = user_data(self.request)
+        queryset = self._bquery(uid, groups, pid).filter(
+            loc__geo_within_center=[(lon, lat), radius]
+        )
+        return queryset
+
+    def regions_queryset(self, pid):
         data = self.request.GET
         regions = data.get('regions', '').split(',')
         uid, groups = user_data(self.request)
-        queryset = self._bquery(uid, groups).filter(region__in=regions)
+        queryset = self._bquery(uid, groups, pid).filter(region__in=regions)
         return queryset
 
-    def cities_queryset(self):
+    def cities_queryset(self, pid):
         data = self.request.GET
         cities = data.get('cities', '').split(',')
         uid, groups = user_data(self.request)
-        queryset = self._bquery(uid, groups).filter(city__in=cities)
+        queryset = self._bquery(uid, groups, pid).filter(city__in=cities)
         return queryset
 
-    def countries_queryset(self):
+    def countries_queryset(self, pid):
         data = self.request.GET
         countries = data.get('countries', '').split(',')
         uid, groups = user_data(self.request)
-        queryset = self._bquery(uid, groups).filter(countries__in=countries)
+        queryset = self._bquery(uid, groups, pid).filter(country__in=countries)
         return queryset
 

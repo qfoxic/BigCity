@@ -1,4 +1,5 @@
 import operator
+import bson
 
 from mongoengine import Q
 from rest_framework.filters import BaseFilterBackend
@@ -6,16 +7,23 @@ from rest_framework.filters import BaseFilterBackend
 
 def search_nodes(queryset, kind, uid, gids):
     if kind:
-        fltr = (Q(kind=kind) | Q(uid=uid) | Q(gid__in=gids))
+        fltr = Q(kind=kind) | Q(uid=uid) | Q(gid__in=gids)
     else:
-        fltr = (Q(uid=uid) | Q(gid__in=gids))
+        fltr = Q(uid=uid) | Q(gid__in=gids)
     return queryset.filter(fltr
         ).where('((1*this.perm[0])&4) || ((1*this.perm[1])&4) || ((1*this.perm[2])&4)')
 
 
-def search_children(queryset, kind, uid, gids, parent_id):
+def search_children(queryset, kind, uid, gids, pid, direct=True):
+    if direct:
+        try:
+            pid = bson.ObjectId(pid)
+        except (TypeError, bson.errors.InvalidId):
+                pid = ''
+        return search_nodes(
+            queryset, kind, uid, gids).filter(parent=pid)
     return search_nodes(queryset, kind, uid, gids).filter(
-        path__startswith=parent_id)
+        path__startswith=pid)
 
 
 class MongoSearchFilter(BaseFilterBackend):
@@ -49,7 +57,8 @@ class MongoSearchFilter(BaseFilterBackend):
 
         and_queries = [Q(**orm_lookup)
                        for orm_lookup in orm_lookups]
-        queryset = queryset.filter(reduce(operator.and_, and_queries))
+        if and_queries:
+            queryset = queryset.filter(reduce(operator.and_, and_queries))
 
         return queryset
 

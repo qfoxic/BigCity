@@ -32,7 +32,8 @@ class BaseManager(object):
         if cast:
             self.serializer = (cast_serializer(kwargs.get('kind'))
                                or self.serializer)
-        return jsonresult(self.serializer(res['object'], many=many).data)
+        srl = self.serializer(res['object'], many=many, data={})
+        return jsonresult(srl.data)
 
     def rm(self, pk):
         res = get_obj(self.serializer, **{'pk': pk})
@@ -75,12 +76,7 @@ def jsonsuccess(msg):
 
 
 def jsonresult(item, direct=False):
-    try:
-        if direct:
-            return {'result': item}
-        return {'result': json.loads(json.dumps(item))}
-    except TypeError:
-        return {'result': []}
+    return {'result': item}
 
 
 def get_obj(serializer, **kwargs):
@@ -127,7 +123,7 @@ def address_to_geo(*args):
     resp = conn.getresponse()
     try:
         converted = json.loads(resp.read())
-    except TypeError:
+        loc = converted['results'][0]['geometry']['location']
+    except (TypeError, IndexError):
         return (0.0, 0.0)
-    loc = converted['results'][0]['geometry']['location']
     return loc['lng'], loc['lat']

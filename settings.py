@@ -94,7 +94,11 @@ MONGO_PORT = 27017
 
 from mongoengine import connect
 
-client = connect('city', host=MONGO_HOST, port=MONGO_PORT)
+if DEBUG:
+    client = connect('test_city', host=MONGO_HOST, port=MONGO_PORT)
+else:
+    client = connect('city', host=MONGO_HOST, port=MONGO_PORT)
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/

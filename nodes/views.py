@@ -21,7 +21,7 @@ class CategoryListView(ListAPIView):
         return CategoryManager(self.request).categories_queryset()
 
 
-class PaginatedAdvertsByAddressView(ListAPIView):
+class PaginatedAdvertsView(ListAPIView):
     serializer_class = AdvertManager.serializer
     filter_backends = (MongoSearchFilter,)
     search_fields = ('rooms', 'square_gen', 'square_live', 'room_height',
@@ -31,15 +31,18 @@ class PaginatedAdvertsByAddressView(ListAPIView):
         data = self.request.GET
         search = data.get('search', 'near').split(',')
         order = data.get('order', '').split(',') # Comma separated.
+        pid = self.kwargs.get('category_id')
         query = None
         if 'near' in search:
-            query = AdvertManager(self.request).nearest_queryset()
+            query = AdvertManager(self.request).nearest_queryset(pid)
+        elif 'within' in search:
+            query = AdvertManager(self.request).within_queryset(pid)
         elif 'region' in search:
-            query = AdvertManager(self.request).regions_queryset()
+            query = AdvertManager(self.request).regions_queryset(pid)
         elif 'city' in search:
-            query = AdvertManager(self.request).cities_queryset()
+            query = AdvertManager(self.request).cities_queryset(pid)
         elif 'country' in search:
-            query = AdvertManager(self.request).countries_queryset()
+            query = AdvertManager(self.request).countries_queryset(pid)
         if order:
             query.order_by(*order)
         return query

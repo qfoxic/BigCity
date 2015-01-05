@@ -54,6 +54,10 @@ class UserViewSet(vws.BaseViewSet):
         group_manager = grp.GroupManager(request)
         ugids = self.manager.groups(pk)['result']
         added, failed, removed = [], [], []
+        for ugid, _ in ugids:
+            res = self.manager.rm_group(pk, ugid)
+            if res.get('success'):
+                removed.append(ugid)
         for gid in gids:
             try:
                 group_manager.data(pk=gid)
@@ -62,11 +66,6 @@ class UserViewSet(vws.BaseViewSet):
                 continue
             self.manager.add_group(pk, gid)
             added.append(gid)
-        if added:
-            for ugid, _ in ugids:
-                res = self.manager.rm_group(pk, ugid)
-                if res.get('success'):
-                    removed.append(ugid)
         res = self.manager.groups(pk)
         gids = res['result']
         res['result'] = {

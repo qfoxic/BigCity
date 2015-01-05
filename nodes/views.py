@@ -29,7 +29,7 @@ class PaginatedAdvertsView(ListAPIView):
 
     def get_queryset(self):
         data = self.request.GET
-        search = data.get('search', 'near').split(',')
+        search = data.get('search', '').split(',')
         order = data.get('order', '').split(',') # Comma separated.
         pid = self.kwargs.get('category_id')
         query = None
@@ -43,8 +43,10 @@ class PaginatedAdvertsView(ListAPIView):
             query = AdvertManager(self.request).cities_queryset(pid)
         elif 'country' in search:
             query = AdvertManager(self.request).countries_queryset(pid)
+        else:
+            query = AdvertManager(self.request).all_queryset(pid)
         if order:
-            query.order_by(*order)
+            query = query.order_by(*order)
         return query
 
 

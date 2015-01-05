@@ -97,3 +97,7 @@ class AdvertManager(NodesManager):
         queryset = self._bquery(uid, groups, pid).filter(country__in=countries)
         return queryset
 
+    def all_queryset(self, pid):
+        uid, groups = user_data(self.request)
+        queryset = self._bquery(uid, groups, pid)
+        return queryset

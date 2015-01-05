@@ -1,8 +1,7 @@
 import datetime
-from mongoengine import Q, ValidationError
+from mongoengine import Q
 from mfs.nodes.managers import NodesManager
 from mfs.users.managers import UsersManager
-from mfs.common.lib import jsonerror
 from nodes.serializers import CategorySerializer, AdvertSerializer
 
 
@@ -20,27 +19,15 @@ def user_data(request):
 class CategoryManager(NodesManager):
     serializer = CategorySerializer
 
-    def add(self, **kwargs):
-        try:
-            return super(CategoryManager, self).add(**kwargs)
-        except ValidationError:
-            return jsonerror('Parent node must be Category.')
-
-    def categories_queryset(self):
+    def categories_queryset(self, pid):
         uid, groups = user_data(self.request)
-        queryset = self.serializer.Meta.model.nodes(
-            uid, groups).only('parent', 'title', 'id', 'path')
+        queryset = self.serializer.Meta.model.children(
+            uid, groups, pid).only('parent', 'title', 'id', 'path')
         return queryset
 
 
 class AdvertManager(NodesManager):
     serializer = AdvertSerializer
-
-    def add(self, **kwargs):
-        try:
-            return super(AdvertManager, self).add(**kwargs)
-        except ValidationError:
-            return jsonerror('Parent node must be Category.')
 
     def _bquery(self, uid, groups, pid):
         return self.serializer.Meta.model.children(

@@ -31,7 +31,8 @@ urlpatterns = drouter.urls
 urlpatterns += patterns('',
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^token/', UserTokenLoginView.as_view(), name='token'),
-    url(r'^categories/', CategoryListView.as_view(), name='categories'),
+    url(r'^categories/(?P<category_id>\w{24})/', CategoryListView.as_view(), name='categories'),
+    url(r'^categories/', CategoryListView.as_view(), name='root-categories'),
     url(r'^adverts/(?P<category_id>\w{24})/', PaginatedAdvertsView.as_view(), name='adverts'),
 )
 

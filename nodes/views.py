@@ -15,10 +15,12 @@ class AdvertViewSet(NodesViewSet):
 
 class CategoryListView(ListAPIView):
     paginate_by = None
+    filter_backends = (MongoSearchFilter,)
     serializer_class = CategoryManager.serializer
 
     def get_queryset(self):
-        return CategoryManager(self.request).categories_queryset()
+        pid = self.kwargs.get('category_id')
+        return CategoryManager(self.request).categories_queryset(pid)
 
 
 class PaginatedAdvertsView(ListAPIView):

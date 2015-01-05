@@ -1,6 +1,7 @@
 import httplib
 import json
 
+from mongoengine import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from mfs.common.serializers import cast_serializer
@@ -43,14 +44,17 @@ class BaseManager(object):
         return jsonsuccess('Object id:<%s> has been removed' % (pk,))
 
     def add(self, **kwargs):
-        data = self.request.data
-        if kwargs:
-            data.update(kwargs)
-        srl = self.serializer(data=data)
-        if srl.is_valid():
-            srl.save()
-            return jsonresult(srl.data)
-        return jsonerror(srl.errors)
+        try:
+            data = self.request.data
+            if kwargs:
+                data.update(kwargs)
+            srl = self.serializer(data=data)
+            if srl.is_valid():
+                srl.save()
+                return jsonresult(srl.data)
+            return jsonerror(srl.errors)
+        except ValidationError:
+            return jsonerror('Parent node has incorrect type.')
 
     def upd(self, **kwargs):
         res = get_obj(self.serializer, **kwargs)

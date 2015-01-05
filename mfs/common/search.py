@@ -17,11 +17,13 @@ def search_nodes(queryset, kind, uid, gids):
 def search_children(queryset, kind, uid, gids, pid, direct=True):
     if direct:
         try:
-            pid = bson.ObjectId(pid)
+            pid = bson.ObjectId(pid) if pid else None
         except (TypeError, bson.errors.InvalidId):
-                pid = ''
-        return search_nodes(
-            queryset, kind, uid, gids).filter(parent=pid)
+            pid = None
+        if pid:
+            return search_nodes(queryset, kind, uid, gids).filter(parent=pid)
+        return search_nodes(queryset, kind, uid, gids).filter(
+            parent__exists=False)
     return search_nodes(queryset, kind, uid, gids).filter(
         path__startswith=pid)
 

@@ -9,7 +9,7 @@ def has_group(user, group):
 
 
 def check_admin(user):
-    if not has_group(user, ADMIN_GROUP):
+    if not (user.is_staff or has_group(user, ADMIN_GROUP)):
         raise PermissionDenied
 
 

@@ -72,10 +72,7 @@ class NodeTests(APITestCase):
             response = self.client.delete('/node/{}/'.format(i))
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    #NODE REMOVAL with parent.
-    # Remove simple node.
-    # Access to nodes - change owner, change group.
-    # Test sharing.
+    #TODO. Test sharing.
     def test_node_data(self):
         uid = self._createUser('wwwbnv@uke.nee1')
         gids = self._createAndAddGroup('test', uid)

@@ -302,5 +302,5 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         res = response.data['result']
         self.assertEqual(res['added'], [])
-        self.assertEqual(res['removed'], [])
+        self.assertEqual(res['removed'], [1, 2, 3])
         self.assertEqual(res['failed'], [123, 1234])

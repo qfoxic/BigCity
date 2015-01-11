@@ -118,7 +118,6 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
             mongoengine.URLField: fields.URLField,
             mongoengine.StringField: fields.CharField,
             mongoengine.BooleanField: fields.BooleanField,
-            mongoengine.FileField: fields.FileField,
             mongoengine.ImageField: fields.ImageField,
             mongoengine.ObjectIdField: ObjectIdField,
             mongoengine.ReferenceField: ReferenceField,
@@ -133,7 +132,6 @@ class MongoEngineModelSerializer(serializers.ModelSerializer):
         attribute_dict = {
             mongoengine.StringField: ['max_length'],
             mongoengine.EmailField: ['max_length'],
-            mongoengine.FileField: ['max_length'],
             mongoengine.URLField: ['max_length'],
         }
 

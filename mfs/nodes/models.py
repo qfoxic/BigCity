@@ -58,7 +58,6 @@ class Node(Document):
     def children(cls, queryset, uid, gids, pid, direct=True, kind=None):
         return search_children(queryset, kind or cls.get_kind(), uid, gids, pid, direct)
 
-
 # TODO. Rename to assets and add support of file fields.
 class Resource(Document):
     uid = fields.IntField(required=True, min_value=1)

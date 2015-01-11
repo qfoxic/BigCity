@@ -6,7 +6,7 @@ from mfs.nodes.views import NodesViewSet, ResourcesViewSet
 
 from users.views import RegularUserViewSet, RegularUserRegisterView
 from nodes.views import (CategoryViewSet, AdvertViewSet, CategoryListView,
-                         PaginatedAdvertsView)
+                         PaginatedAdvertsView, AssetViewSet, AssetsListView)
 
 
 drouter = routers.DefaultRouter()
@@ -20,11 +20,9 @@ drouter.register(r'login', UserLoginView, base_name='login')
 drouter.register(r'node', NodesViewSet, base_name='node') # TODO. For tests only.
 drouter.register(r'resource', ResourcesViewSet, base_name='resource') # TODO. For tests only.
 
-# Category.
-drouter.register(r'category', CategoryViewSet, base_name='category') # Node.
-
-# Advert url.
-drouter.register(r'advert', AdvertViewSet, base_name='advert') # Node.
+drouter.register(r'category', CategoryViewSet, base_name='category')
+drouter.register(r'advert', AdvertViewSet, base_name='advert')
+drouter.register(r'asset', AssetViewSet, base_name='asset')
 
 urlpatterns = drouter.urls
 
@@ -34,6 +32,7 @@ urlpatterns += patterns('',
     url(r'^categories/(?P<category_id>\w{24})/', CategoryListView.as_view(), name='categories'),
     url(r'^categories/', CategoryListView.as_view(), name='root-categories'),
     url(r'^adverts/(?P<category_id>\w{24})/', PaginatedAdvertsView.as_view(), name='adverts'),
+    url(r'^assets/(?P<advert_id>\w{24})/', AssetsListView.as_view(), name='assets')
 )
 
 

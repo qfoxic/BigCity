@@ -2,7 +2,7 @@ import datetime
 from mongoengine import Q
 from mfs.nodes.managers import NodesManager
 from mfs.users.managers import UsersManager
-from nodes.serializers import CategorySerializer, AdvertSerializer
+from nodes.serializers import CategorySerializer, AdvertSerializer, AssetSerializer
 
 
 def user_data(request):
@@ -23,6 +23,16 @@ class CategoryManager(NodesManager):
         uid, groups = user_data(self.request)
         queryset = self.serializer.Meta.model.children(
             uid, groups, pid).only('parent', 'title', 'id', 'path')
+        return queryset
+
+
+class AssetManager(NodesManager):
+    serializer = AssetSerializer
+
+    def assets_queryset(self, pid, content_type):
+        uid, groups = user_data(self.request)
+        queryset = self.serializer.Meta.model.children(
+            uid, groups, pid).filter(content_type=content_type)
         return queryset
 
 

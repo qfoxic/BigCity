@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -73,7 +75,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
     'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
-    'PAGINATE_BY': 50
+    'PAGINATE_BY': 50,
+    'UPLOADED_FILES_USE_URL': False
 }
 
 # Internationalization
@@ -104,3 +107,4 @@ else:
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+

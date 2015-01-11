@@ -1,13 +1,19 @@
 from mfs.nodes.serializers import NodeSerializer
-from nodes.models import Category, Advert
+from nodes.models import Category, Advert, Asset
 from mfs.common.lib import address_to_geo
 
 
-# Node.
 class CategorySerializer(NodeSerializer):
     class Meta(NodeSerializer.Meta):
         model = Category
         fields = ('id', 'parent', 'path', 'title', 'perm', 'uid', 'gid')
+
+
+class AssetSerializer(NodeSerializer):
+    class Meta(NodeSerializer.Meta):
+        model = Asset
+        fields = ('id', 'parent', 'path', 'title', 'perm', 'content', 'uid',
+                  'gid', 'content_type', 'asset_type')
 
 
 class AdvertSerializer(NodeSerializer):
@@ -33,4 +39,7 @@ class AdvertSerializer(NodeSerializer):
                                          data.get('street', ''))
         self.resolve_to_geo(country, region, city, street)
         return super(AdvertSerializer, self).save(**kwargs)
+
+
+
 

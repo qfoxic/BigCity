@@ -45,16 +45,21 @@ class BaseManager(object):
 
     def add(self, **kwargs):
         try:
-            data = self.request.data
+            # TODO. MUST BE ADRESSED IN API 3.1.
+            try:
+                data = self.request.data.dicts[0] or self.request.data.dicts[1]
+            except:
+                data = self.request.data
             if kwargs:
                 data.update(kwargs)
             srl = self.serializer(data=data)
+            # TODO. Remove save method and use "create" instead.
             if srl.is_valid():
                 srl.save()
                 return jsonresult(srl.data)
             return jsonerror(srl.errors)
-        except ValidationError:
-            return jsonerror('Parent node has incorrect type.')
+        except ValidationError as e:
+            return jsonerror('Error: {}'.format(e))
 
     def upd(self, **kwargs):
         res = get_obj(self.serializer, **kwargs)

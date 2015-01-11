@@ -230,5 +230,3 @@ class DateTimeField(MongoDocumentField):
 
     def to_internal_value(self, value):
         return self.to_mongo(value)
-
-

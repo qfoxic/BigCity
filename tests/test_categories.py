@@ -111,6 +111,25 @@ class NodeTests(APITestCase):
         self.assertEqual('Category3', data['title'])
         self._removeNodes(pid1, pid2, pid3)
 
+    def test_has_children(self):
+        uid = self._createUser('wwwbnv@uke.nee1')
+        self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
+        pid1, pid2, pid3 = self._createTree(uid)
+        response = self.client.get('/category/{}/'.format(pid1), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data['result']
+        self.assertEqual(True, data['has_children'])
+        response = self.client.get('/category/{}/'.format(pid2), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data['result']
+        self.assertEqual(True, data['has_children'])
+        response = self.client.get('/category/{}/'.format(pid3), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data['result']
+        self.assertEqual(False, data['has_children'])
+        self._removeNodes(pid1, pid2, pid3)
+
     def test_update_node(self):
         uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)

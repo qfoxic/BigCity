@@ -8,6 +8,13 @@ class CategorySerializer(NodeSerializer):
         model = Category
         fields = ('id', 'parent', 'path', 'title', 'perm', 'uid', 'gid')
 
+    def to_representation(self, instance):
+        has_children = instance.__class__.children(instance.uid, [instance.gid],
+                                                   instance.id).count()
+        res = super(CategorySerializer, self).to_representation(instance)
+        res['has_children'] = bool(has_children)
+        return res
+
 
 class AssetSerializer(NodeSerializer):
     class Meta(NodeSerializer.Meta):

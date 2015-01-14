@@ -7,7 +7,7 @@ from mfs.common.search import search_nodes, search_children
 class Node(Document):
     uid = fields.IntField(required=True, min_value=1)
     #unix permission.
-    perm = fields.StringField(default=UMASK)
+    perm = fields.StringField(regex='[01234567]{3}', default=UMASK)
     # dot separated path of entity's ids.
     path = fields.StringField(max_length=3000)
     kind = fields.StringField(max_length=50)

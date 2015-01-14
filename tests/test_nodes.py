@@ -135,6 +135,16 @@ class NodeTests(APITestCase):
         self.assertEqual(response.data['result']['perm'], '777')
         self._removeNodes(pid1, pid2, pid3)
 
+    def test_update_node_incorrect_perms(self):
+        uid = self._createUser('wwwbnv@uke.nee1')
+        self._createAndAddGroup('test', uid)
+        self._loginUser('wwwbnv@uke.nee1')
+        pid1, pid2, pid3 = self._createTree(uid)
+        response = self.client.put('/node/{}/'.format(pid1), {'perm': '888'},
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self._removeNodes(pid1, pid2, pid3)
+
     def test_owner_read_perm(self):
         uid = self._createUser('wwwbnv@uke.nee1')
         self._createAndAddGroup('test', uid)

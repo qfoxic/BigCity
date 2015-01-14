@@ -62,16 +62,20 @@ class BaseManager(object):
             return jsonerror('Error: {}'.format(e))
 
     def upd(self, **kwargs):
-        res = get_obj(self.serializer, **kwargs)
-        if res.get('error'):
-            return jsonerror(res['error'])
-        srl = self.serializer(res['object'],
-                              data=self.request.data,
-                              partial=True)
-        if srl.is_valid():
-            srl.save()
-            return jsonresult(srl.data)
-        return jsonerror(''.join([','.join([k + '-' + ''.join(v)]) for k, v in srl.errors.items()]))
+        try:
+            res = get_obj(self.serializer, **kwargs)
+            if res.get('error'):
+                return jsonerror(res['error'])
+            srl = self.serializer(res['object'],
+                                  data=self.request.data,
+                                  partial=True)
+            if srl.is_valid():
+                srl.save()
+                return jsonresult(srl.data)
+            return jsonerror(''.join([','.join([k + '-' + ''.join(v)])
+                                      for k, v in srl.errors.items()]))
+        except ValidationError as e:
+            return jsonerror('Error: {}'.format(e))
 
 
 def jsonerror(error, traceback=None):

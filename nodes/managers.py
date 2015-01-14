@@ -22,7 +22,7 @@ class CategoryManager(NodesManager):
     def categories_queryset(self, pid):
         uid, groups = user_data(self.request)
         queryset = self.serializer.Meta.model.children(
-            uid, groups, pid).only('parent', 'title', 'id', 'path')
+            uid, groups, pid)
         return queryset
 
 

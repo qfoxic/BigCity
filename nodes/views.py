@@ -6,7 +6,6 @@ from mfs.common.search import MongoSearchFilter
 from nodes.managers import CategoryManager, AdvertManager, AssetManager
 
 
-
 class CategoryViewSet(NodesViewSet):
     manager_class = CategoryManager
 
@@ -20,7 +19,6 @@ class AssetViewSet(NodesViewSet):
     manager_class = AssetManager
 
     def create(self, request):
-        import pdb;pdb.set_trace()
         uid = request.user.pk
         return Response({})
         #um = usr.UsersManager(request)

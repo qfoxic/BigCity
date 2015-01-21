@@ -6,7 +6,7 @@ from mfs.nodes.views import NodesViewSet, ResourcesViewSet
 
 from users.views import RegularUserViewSet, RegularUserRegisterView
 from nodes.views import (CategoryViewSet, AdvertViewSet, CategoryListView,
-                         PaginatedAdvertsView, AssetViewSet, AssetsListView)
+                         PaginatedAdvertsView, ImageViewSet, ImagesListView)
 
 
 drouter = routers.DefaultRouter()
@@ -22,7 +22,7 @@ drouter.register(r'resource', ResourcesViewSet, base_name='resource') # TODO. Fo
 
 drouter.register(r'category', CategoryViewSet, base_name='category')
 drouter.register(r'advert', AdvertViewSet, base_name='advert')
-drouter.register(r'asset', AssetViewSet, base_name='asset')
+drouter.register(r'image', ImageViewSet, base_name='image')
 
 urlpatterns = drouter.urls
 
@@ -32,7 +32,7 @@ urlpatterns += patterns('',
     url(r'^categories/(?P<category_id>\w{24})/', CategoryListView.as_view(), name='categories'),
     url(r'^categories/', CategoryListView.as_view(), name='root-categories'),
     url(r'^adverts/(?P<category_id>\w{24})/', PaginatedAdvertsView.as_view(), name='adverts'),
-    url(r'^assets/(?P<advert_id>\w{24})/', AssetsListView.as_view(), name='assets')
+    url(r'^images/(?P<advert_id>\w{24})/', ImagesListView.as_view(), name='images')
 )
 
 

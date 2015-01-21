@@ -51,7 +51,7 @@ class AssetTests(APITestCase):
             asset = {'uid': uid, 'perm': '666', 'parent': pid,
                      'title': 'Image', 'asset_type': 'image',
                      'content_type': 'image/jpg', 'content': f}
-            response = self.client.post('/asset/', asset)
+            response = self.client.post('/image/', asset)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             aid = response.data['result']['id']
         return cat, pid, aid
@@ -63,7 +63,7 @@ class AssetTests(APITestCase):
             response = self.client.delete('/{}/{}/'.format(t, i))
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def est_node_data(self):
+    def test_node_data(self):
         uid = self._createUser('wwwbnv@uke.nee1')
         self._loginUser('wwwbnv@uke.nee1')
         cat, _, _ = self._createTree(uid)

@@ -39,12 +39,12 @@ class Advert(Node):
     text = fields.StringField(max_length=5000)
 
 
-class Asset(Node):
+class Image(Node):
     parent = fields.ReferenceField('Advert', reverse_delete_rule=CASCADE)
     title = fields.StringField(required=True, max_length=300)
     # image/png, application/pdf etc
     content_type = fields.StringField(required=True, max_length=100)
     # image, video etc.
     asset_type = fields.StringField(required=True, max_length=100)
-    content = fields.ImageField()
+    content = fields.ImageField(thumbnail_size=(100, 100, True))
 

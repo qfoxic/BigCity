@@ -1,5 +1,5 @@
 from mfs.nodes.serializers import NodeSerializer
-from nodes.models import Category, Advert, Asset
+from nodes.models import Category, Advert, Image
 from mfs.common.lib import address_to_geo
 
 
@@ -16,9 +16,9 @@ class CategorySerializer(NodeSerializer):
         return res
 
 
-class AssetSerializer(NodeSerializer):
+class ImageSerializer(NodeSerializer):
     class Meta(NodeSerializer.Meta):
-        model = Asset
+        model = Image
         fields = ('id', 'parent', 'path', 'title', 'perm', 'content', 'uid',
                   'gid', 'content_type', 'asset_type')
 

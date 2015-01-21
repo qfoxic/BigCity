@@ -46,6 +46,14 @@ class MongoSearchFilter(BaseFilterBackend):
             return {'{}__lte'.format(field_name): field_value.strip('lte ')}
         elif field_value.startswith('eq'):
             return {'{}__eq'.format(field_name): field_value.strip('eq ')}
+        elif field_value.startswith('sw'):
+            return {'{}__startswith'.format(field_name): field_value.strip('sw ')}
+        elif field_value.startswith('isw'):
+            return {'{}__istartswith'.format(field_name): field_value.strip('isw ')}
+        elif field_value.startswith('icns'):
+            return {'{}__icontains'.format(field_name): field_value.strip('icns ')}
+        elif field_value.startswith('cns'):
+            return {'{}__contains'.format(field_name): field_value.strip('cns ')}
 
     def filter_queryset(self, request, queryset, view):
         data = request.GET

@@ -61,6 +61,7 @@ class CategoryListView(ListAPIView):
     paginate_by = None
     filter_backends = (MongoSearchFilter,)
     serializer_class = CategoryManager.serializer
+    search_fields = ('title',)
 
     def get_queryset(self):
         pid = self.kwargs.get('category_id')

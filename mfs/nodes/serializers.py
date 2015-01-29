@@ -1,5 +1,4 @@
 from mfs.nodes.models import Node
-from mfs.nodes.models import Resource
 from mfs.common.serializers import MongoEngineModelSerializer
 """
 The basic idea is that we have nodes and their resources.
@@ -24,12 +23,4 @@ class NodeSerializer(MongoEngineModelSerializer):
                   'created', 'updated', 'parent', 'shared',
                   'gid', 'path')
         read_only_fields = ('path',)
-
-
-class ResourceSerializer(MongoEngineModelSerializer):
-    class Meta:
-        depth = 2
-        model = Resource
-        fields = ('id', 'kind', 'created',
-                  'updated', 'parent')
 

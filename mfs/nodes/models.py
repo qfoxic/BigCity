@@ -1,5 +1,5 @@
 import datetime
-from mongoengine import Document, fields, NULLIFY, CASCADE, queryset_manager
+from mongoengine import Document, fields, NULLIFY, queryset_manager
 from mfs.common.constants import UMASK
 from mfs.common.search import search_nodes, search_children
 
@@ -57,38 +57,3 @@ class Node(Document):
     @queryset_manager
     def children(cls, queryset, uid, gids, pid, direct=True, kind=None):
         return search_children(queryset, kind or cls.get_kind(), uid, gids, pid, direct)
-
-# TODO. Rename to assets and add support of file fields.
-class Resource(Document):
-    uid = fields.IntField(required=True, min_value=1)
-    perm = fields.StringField(default=UMASK)
-    gid = fields.IntField(required=True, min_value=1)
-    kind = fields.StringField(max_length=50)
-    # timestamp.
-    created = fields.DateTimeField()
-    # timestamp.
-    updated = fields.DateTimeField(default=datetime.datetime.utcnow())
-    # Parent record. Mongo object id. We don't have resource parents
-    parent = fields.ReferenceField('Node', reverse_delete_rule=CASCADE,
-                                   required=True)
-
-    meta = {
-        'allow_inheritance': True
-    }
-
-    def save(self, *args, **kwargs):
-        if not self.created:
-            self.created = datetime.datetime.utcnow()
-        self.kind = self.get_kind()
-        self.uid = self.parent.uid
-        self.perm = self.parent.perm
-        self.gid = self.parent.gid
-        return super(Resource, self).save(*args, **kwargs)
-
-    @classmethod
-    def get_kind(cls):
-        return cls.__name__.lower()
-
-    @queryset_manager
-    def resources(cls, queryset, uid, gids, kind=None):
-        return search_nodes(queryset, kind or cls.get_kind(), uid, gids)

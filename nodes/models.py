@@ -40,7 +40,7 @@ class Advert(Node):
 
 
 class Image(Node):
-    parent = fields.ReferenceField('Advert', reverse_delete_rule=CASCADE)
+    parent = fields.GenericReferenceField(reverse_delete_rule=CASCADE)
     title = fields.StringField(required=True, max_length=300)
     # image/png, application/pdf etc
     content_type = fields.StringField(required=True, max_length=100)

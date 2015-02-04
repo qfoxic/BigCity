@@ -1,12 +1,12 @@
 from django.conf.urls import url, patterns, include
 from rest_framework import routers
-from mfs.groups.views import GroupViewSet
-from mfs.users.views import UserLoginView, UserLogoutView, UserTokenLoginView
-from mfs.nodes.views import NodesViewSet
+from mfs.groups.views import GroupViewSet, GroupListViewSet
+from mfs.users.views import UserLoginView, UserLogoutView, UserTokenLoginView, UserListViewSet
+from mfs.nodes.views import (NodesViewSet, ImageViewSet, ImagesListView)
 
 from users.views import RegularUserViewSet, RegularUserRegisterView
 from nodes.views import (CategoryViewSet, AdvertViewSet, CategoryListView,
-                         PaginatedAdvertsView, ImageViewSet, ImagesListView)
+                         PaginatedAdvertsView)
 
 
 drouter = routers.DefaultRouter()
@@ -31,7 +31,9 @@ urlpatterns += patterns('',
     url(r'^categories/(?P<category_id>\w{24})/', CategoryListView.as_view(), name='categories'),
     url(r'^categories/', CategoryListView.as_view(), name='root-categories'),
     url(r'^adverts/(?P<category_id>\w{24})/', PaginatedAdvertsView.as_view(), name='adverts'),
-    url(r'^images/(?P<advert_id>\w{24})/', ImagesListView.as_view(), name='images')
+    url(r'^images/(?P<advert_id>\w{24})/', ImagesListView.as_view(), name='images'),
+    url(r'^groups/', GroupListViewSet.as_view(), name='groups'),
+    url(r'^users/', UserListViewSet.as_view(), name='users')
 )
 
 

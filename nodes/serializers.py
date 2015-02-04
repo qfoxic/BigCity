@@ -1,6 +1,6 @@
 from mfs.nodes.serializers import NodeSerializer
-from nodes.models import Category, Advert, Image
-from mfs.common.lib import address_to_geo
+from nodes.models import Category, Advert
+from mfs.common.utils import address_to_geo
 
 
 class CategorySerializer(NodeSerializer):
@@ -16,11 +16,9 @@ class CategorySerializer(NodeSerializer):
         return res
 
 
-class ImageSerializer(NodeSerializer):
+class CategoryListSerializer(CategorySerializer):
     class Meta(NodeSerializer.Meta):
-        model = Image
-        fields = ('id', 'parent', 'path', 'title', 'perm', 'content', 'uid',
-                  'gid', 'content_type', 'asset_type')
+        pass
 
 
 class AdvertSerializer(NodeSerializer):
@@ -32,8 +30,7 @@ class AdvertSerializer(NodeSerializer):
                                                'square_live', 'room_height',
                                                'floors', 'wall_type',
                                                'build_type', 'price',
-                                               'finished', 'text',
-                                               'build_vector')
+                                               'finished', 'text')
 
     def resolve_to_geo(self, *params):
         self.validated_data['loc'] = address_to_geo(*params)
@@ -48,5 +45,8 @@ class AdvertSerializer(NodeSerializer):
         return super(AdvertSerializer, self).save(**kwargs)
 
 
-
-
+class AdvertListSerializer(NodeSerializer):
+    class Meta(NodeSerializer.Meta):
+        model = Advert
+        fields = NodeSerializer.Meta.fields + ('title', 'price', 'city')
+        read_only_fields = NodeSerializer.Meta.fields + ('title', 'price', 'city')

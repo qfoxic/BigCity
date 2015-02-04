@@ -4,6 +4,7 @@ from rest_framework import status
 
 import mfs.groups.managers as grp
 from mfs.common.views import BaseViewSet
+from rest_framework.generics import ListAPIView
 from mfs.common.permissions import IsAdminGroup
 
 
@@ -31,3 +32,9 @@ class GroupViewSet(BaseViewSet):
 
     def destroy(self, request, pk=None):
         return Response(data=self.manager.rm(pk))
+
+
+class GroupListViewSet(ListAPIView):
+    permission_classes = [IsAdminGroup, permissions.IsAuthenticated]
+    serializer_class = grp.GroupManager.serializer
+    search_fields = ('title',)

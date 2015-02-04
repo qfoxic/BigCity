@@ -6,7 +6,6 @@ WALL_TYPES = ((0, 'Ferroconcrete'), (1, 'Brick'),)
 BUILD_TYPES = ((0, 'New'), (1, 'Secondary'),)
 
 
-# Nodes.
 class Category(Node):
     parent = fields.ReferenceField('Category', reverse_delete_rule=NULLIFY)
     title = fields.StringField(required=True, max_length=3000)
@@ -38,13 +37,4 @@ class Advert(Node):
 
     text = fields.StringField(max_length=5000)
 
-
-class Image(Node):
-    parent = fields.GenericReferenceField(reverse_delete_rule=CASCADE)
-    title = fields.StringField(required=True, max_length=300)
-    # image/png, application/pdf etc
-    content_type = fields.StringField(required=True, max_length=100)
-    # image, video etc.
-    asset_type = fields.StringField(required=True, max_length=100)
-    content = fields.ImageField(thumbnail_size=(100, 100, True))
 

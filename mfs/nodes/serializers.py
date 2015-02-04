@@ -1,4 +1,4 @@
-from mfs.nodes.models import Node
+from mfs.nodes.models import (Node, Image)
 from mfs.common.serializers import MongoEngineModelSerializer
 """
 The basic idea is that we have nodes and their resources.
@@ -24,3 +24,16 @@ class NodeSerializer(MongoEngineModelSerializer):
                   'gid', 'path')
         read_only_fields = ('path',)
 
+
+class ImageSerializer(NodeSerializer):
+    class Meta(NodeSerializer.Meta):
+        model = Image
+        fields = ('id', 'parent', 'path', 'title', 'perm', 'content', 'uid',
+                  'gid', 'content_type', 'asset_type')
+
+
+class ImageSerializerList(NodeSerializer):
+    class Meta(NodeSerializer.Meta):
+        model = Image
+        fields = ('id', 'title', 'perm', 'uid',
+                  'gid', 'content_type')

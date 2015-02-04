@@ -1,8 +1,8 @@
-import mfs.common.lib as clib
 from mfs.groups.serializers import GroupSerializer
+from mfs.common.managers import BaseManager
 
 
-class GroupManager(clib.BaseManager):
+class GroupManager(BaseManager):
     serializer = GroupSerializer
 
 

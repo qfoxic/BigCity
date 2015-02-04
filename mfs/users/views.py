@@ -5,10 +5,12 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 
 import mfs.users.managers as usr
 import mfs.groups.managers as grp
 import mfs.common.views as vws
+from mfs.common.permissions import IsAdminGroup
 
 
 #TODO Add reset password with emails.
@@ -136,3 +138,9 @@ class UserTokenLoginView(views.ObtainAuthToken):
         token, _ = Token.objects.get_or_create(user=user)
         user = usr.UsersManager(request).data(pk=user.id)
         return Response({'token': token.key, 'user': user['result']})
+
+
+class UserListViewSet(ListAPIView):
+    permission_classes = [IsAdminGroup, permissions.IsAuthenticated]
+    serializer_class = usr.UsersManager.serializer
+    search_fields = ('username',)

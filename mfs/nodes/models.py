@@ -1,5 +1,5 @@
 import datetime
-from mongoengine import Document, fields, NULLIFY, queryset_manager
+from mongoengine import Document, fields, NULLIFY, CASCADE, queryset_manager
 from mfs.common.constants import UMASK
 from mfs.common.search import search_nodes, search_children
 
@@ -57,3 +57,15 @@ class Node(Document):
     @queryset_manager
     def children(cls, queryset, uid, gids, pid, direct=True, kind=None):
         return search_children(queryset, kind or cls.get_kind(), uid, gids, pid, direct)
+
+
+class Image(Node):
+    parent = fields.ReferenceField('Node', reverse_delete_rule=CASCADE)
+    title = fields.StringField(required=True, max_length=300)
+    # image/png, application/pdf etc
+    content_type = fields.StringField(required=True, max_length=100)
+    # image, video etc.
+    asset_type = fields.StringField(required=True, max_length=100)
+    content = fields.ImageField(thumbnail_size=(100, 100, True))
+
+

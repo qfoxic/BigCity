@@ -1,11 +1,13 @@
 from django.contrib.auth import authenticate, login, logout
-import mfs.common.lib as clib
-from mfs.users.serializers import UserSerializer
 from django.contrib.auth.models import Group
+
+import mfs.common.utils as clib
+from mfs.common.managers import BaseManager
+from mfs.users.serializers import UserSerializer
 from mfs.common.constants import DEFAULT_GROUP
 
 
-class UsersManager(clib.BaseManager):
+class UsersManager(BaseManager):
     serializer = UserSerializer
 
     def logout(self, request):
@@ -74,5 +76,5 @@ class UsersManager(clib.BaseManager):
         except Exception, e:
             return clib.jsonerror(str(e))
         return clib.jsonresult(
-            [(i[0], i[1]) for i in user.groups.values_list('id', 'name')], True
+            [(i[0], i[1]) for i in user.groups.values_list('id', 'name')]
         )

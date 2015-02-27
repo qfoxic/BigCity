@@ -4,14 +4,13 @@ from mfs.groups.views import GroupViewSet, GroupListViewSet
 from mfs.users.views import UserLoginView, UserLogoutView, UserTokenLoginView, UserListViewSet
 from mfs.nodes.views import (NodesViewSet, ImageViewSet, ImagesListView)
 
-from users.views import RegularUserViewSet, RegularUserRegisterView
+from users.views import RegularUserViewSet
 from nodes.views import (CategoryViewSet, AdvertViewSet, CategoryListView,
                          PaginatedAdvertsView)
 
 
 drouter = routers.DefaultRouter()
 drouter.register(r'group', GroupViewSet, base_name='group')
-drouter.register(r'user/register', RegularUserRegisterView, base_name='register')
 drouter.register(r'user', RegularUserViewSet, base_name='user')
 
 drouter.register(r'logout', UserLogoutView, base_name='logout')

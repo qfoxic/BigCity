@@ -21,7 +21,7 @@ class AssetTests(APITestCase):
         data = {'username': username, 'email': username,
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
-        response = self.client.post('/user/register/', data, format='json')
+        response = self.client.post('/user/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         uid = response.data['result']['id']
         return uid

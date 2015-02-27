@@ -25,4 +25,11 @@ class IsAuthenticatedOrOwner(BasePermission):
         return True
 
 
-
+class IsAuthenticatedCreateAllowed(BasePermission):
+    def has_permission(self, request, view):
+        is_user_creation = (len(request.path.strip('/').split('/')) <= 1)
+        if request.method in ['POST'] and is_user_creation:
+            return True
+        if not request.user.is_authenticated():
+            return False
+        return True

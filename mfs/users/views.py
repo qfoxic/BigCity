@@ -10,16 +10,22 @@ from rest_framework.generics import ListAPIView
 import mfs.users.managers as usr
 import mfs.groups.managers as grp
 import mfs.common.views as vws
-from mfs.common.permissions import IsAdminGroup
+from mfs.common.permissions import IsAdminGroup, IsAuthenticatedCreateAllowed
 
 
 #TODO Add reset password with emails.
 class UserViewSet(vws.BaseViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticatedCreateAllowed]
     manager_class = usr.UsersManager
 
     def list(self, request):
         return Response(data=self.manager.ls())
+
+    def create(self, request, pk=None):
+        res = self.manager.add()
+        if res.get('error'):
+            return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data=res)
 
     def retrieve(self, request, pk=None):
         return Response(data=self.manager.data(pk=pk))
@@ -93,17 +99,6 @@ class UserViewSet(vws.BaseViewSet):
     @detail_route(methods=['get'])
     def groups(self, request, pk=None):
         return Response(data=self.manager.groups(pk))
-
-
-class UserRegisterView(vws.BaseViewSet):
-    permission_classes = [permissions.AllowAny,]
-    manager_class = usr.UsersManager
-
-    def create(self, request):
-        res = self.manager.add()
-        if res.get('error'):
-            return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data=res)
 
 
 class UserLoginView(vws.BaseViewSet):

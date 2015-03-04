@@ -139,3 +139,8 @@ class UserListViewSet(ListAPIView):
     permission_classes = [IsAdminGroup, permissions.IsAuthenticated]
     serializer_class = usr.UsersManager.serializer
     search_fields = ('username',)
+
+    def get_queryset(self):
+        queryset = self.serializer_class.Meta.model.objects.all()
+        return queryset
+

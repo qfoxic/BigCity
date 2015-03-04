@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'mfs',
@@ -44,6 +45,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -53,6 +55,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'urls'
+CORS_ORIGIN_ALLOW_ALL = True
 
 WSGI_APPLICATION = 'wsgi.application'
 

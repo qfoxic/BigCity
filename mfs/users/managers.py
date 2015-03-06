@@ -1,5 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
+from rest_framework.authtoken.models import Token
+
 
 import mfs.common.utils as clib
 from mfs.common.managers import BaseManager
@@ -21,7 +23,10 @@ class UsersManager(BaseManager):
         user = authenticate(username=username, password=password)
         if user:
             login(request, user)
-            return self.data(pk=user.id)
+            token, _ = Token.objects.get_or_create(user=user)
+            data = self.data(pk=user.id)
+            data['result']['token'] = token.key
+            return data
         return {}
 
     def add(self, **kwargs):

@@ -27,7 +27,7 @@ class UsersManager(BaseManager):
             data = self.data(pk=user.id)
             data['result']['token'] = token.key
             return data
-        return {}
+        return clib.jsonerror('Invalid credentials')
 
     def add(self, **kwargs):
         res = super(UsersManager, self).add(**kwargs)

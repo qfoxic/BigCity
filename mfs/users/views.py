@@ -109,9 +109,9 @@ class UserLoginView(vws.BaseViewSet):
         username, password = (request.data.get('username'),
                               request.data.get('password'))
         res = self.manager.login(request, username, password)
-        if res:
-            return Response(data=res)
-        return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
+        if 'error' in res:
+            return Response(data=res, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data=res)
 
 
 class UserLogoutView(vws.BaseViewSet):

@@ -48,7 +48,7 @@ class NodeTests(APITestCase):
         response = self.client.get('/user/{}/groups/'.format(uid), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.logout()
-        return [i[0] for i in response.data['result']]
+        return [i['id'] for i in response.data['result']]
 
     def _createTree(self, uid):
         node = {'uid': uid, 'perm': '666'}

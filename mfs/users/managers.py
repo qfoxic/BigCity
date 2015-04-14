@@ -81,5 +81,5 @@ class UsersManager(BaseManager):
         except Exception, e:
             return clib.jsonerror(str(e))
         return clib.jsonresult(
-            [(i[0], i[1]) for i in user.groups.values_list('id', 'name')]
+            [{'id': i[0], 'name': i[1]} for i in user.groups.values_list('id', 'name')]
         )

@@ -15,7 +15,7 @@ def user_data(request, manager):
     if user.is_authenticated():
         ures = um.data(pk=request.user.pk)
         if not ures.get('error'):
-            uid, groups = user.pk, [i[0] for i in ures['result']['groups']]
+            uid, groups = user.pk, [i['id'] for i in ures['result']['groups']]
     return uid, groups
 
 
@@ -47,7 +47,7 @@ def check_perm(node, user, perm_to_check):
         return True
 
     owner, group, other = int(perm[0]), int(perm[1]), int(perm[2])
-    user_gids = [i[0] for i in user['groups']]
+    user_gids = [i['id'] for i in user['groups']]
     # Check owner permissions.
     if uid == node['uid']:
         return bool(owner & perm_to_check)

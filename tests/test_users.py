@@ -95,7 +95,7 @@ class UserTests(APITestCase):
         response = self.client.get('/user/{}/groups/'.format(user_id),
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertAlmostEqual(response.data['result'][0][0], gid)
+        self.assertAlmostEqual(response.data['result'][0]['id'], gid)
         self.client.login(username='wwwbnv@uke.nee', password='qwerty')
         response = self.client.delete('/user/{}/'.format(user_id),
                                       format='json')
@@ -134,7 +134,7 @@ class UserTests(APITestCase):
         response = self.client.get('/user/{}/groups/'.format(user_id),
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertAlmostEqual(response.data['result'][0][0], gid)
+        self.assertAlmostEqual(response.data['result'][0]['id'], gid)
         response = self.client.post('/user/{}/rmgroup/'.format(user_id),
                                     {'gid': gid}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -229,10 +229,10 @@ class UserTests(APITestCase):
         response = self.client.get('/user/{}/groups/'.format(user_id),
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data['result'][0][0] in (gid, gid1))
-        self.assertTrue(response.data['result'][1][0] in (gid, gid1))
+        self.assertTrue(response.data['result'][0]['id'] in (gid, gid1))
+        self.assertTrue(response.data['result'][1]['id'] in (gid, gid1))
         response = self.client.post('/user/{}/updgroups/'.format(user_id),
-                                    {'gids': [gid2, gid3]}, format='json')
+                                    {'gids': [{'id': gid2}, {'id': gid3}]}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         res = response.data['result']
         self.assertEqual(res['added'], [gid2, gid3])
@@ -262,10 +262,11 @@ class UserTests(APITestCase):
         response = self.client.get('/user/{}/groups/'.format(user_id),
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data['result'][0][0] in (gid, gid1))
-        self.assertTrue(response.data['result'][1][0] in (gid, gid1))
+        self.assertTrue(response.data['result'][0]['id'] in (gid, gid1))
+        self.assertTrue(response.data['result'][1]['id'] in (gid, gid1))
         response = self.client.post('/user/{}/updgroups/'.format(user_id),
-                                    {'gids': [gid2, 123, 1234]}, format='json')
+                                    {'gids': [{'id':gid2}, {'id': 123}, {'id': 1234}]},
+                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         res = response.data['result']
         self.assertEqual(res['added'], [gid2])
@@ -295,10 +296,10 @@ class UserTests(APITestCase):
         response = self.client.get('/user/{}/groups/'.format(user_id),
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data['result'][0][0] in (gid, gid1))
-        self.assertTrue(response.data['result'][1][0] in (gid, gid1))
+        self.assertTrue(response.data['result'][0]['id'] in (gid, gid1))
+        self.assertTrue(response.data['result'][1]['id'] in (gid, gid1))
         response = self.client.post('/user/{}/updgroups/'.format(user_id),
-                                    {'gids': [123, 1234]}, format='json')
+                                    {'gids': [{'id': 123}, {'id':1234}]}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         res = response.data['result']
         self.assertEqual(res['added'], [])

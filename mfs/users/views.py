@@ -60,9 +60,13 @@ class UserViewSet(vws.BaseViewSet):
         """Remove all user groups and add new ones."""
         gids = request.data.get('gids')
         group_manager = grp.GroupManager(request)
+
         ugids = self.manager.groups(pk)['result']
+        ugids = [i['id'] for i in  ugids]
+        gids = [i['id'] for i in  gids]
+
         added, failed, removed = [], [], []
-        for ugid, _ in ugids:
+        for ugid in ugids:
             res = self.manager.rm_group(pk, ugid)
             if res.get('success'):
                 removed.append(ugid)

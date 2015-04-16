@@ -96,7 +96,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-MONGO_HOST = '127.0.0.1'
+MONGO_HOST = '0.0.0.0'
 MONGO_PORT = 27017
 
 from mongoengine import connect

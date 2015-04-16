@@ -32,6 +32,13 @@ class ImageSerializer(NodeSerializer):
                   'gid', 'content_type', 'asset_type')
 
 
+class NodeSerializerList(NodeSerializer):
+    class Meta(NodeSerializer.Meta):
+        model = Node
+        fields = ('id', 'title', 'perm', 'uid',
+                  'gid', 'parent', 'path', 'created', 'updated')
+
+
 class ImageSerializerList(NodeSerializer):
     class Meta(NodeSerializer.Meta):
         model = Image

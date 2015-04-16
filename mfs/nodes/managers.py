@@ -3,10 +3,18 @@ import mfs.common.utils as clib
 from mfs.nodes.serializers import (NodeSerializer, ImageSerializer)
 from mfs.common.managers import BaseManager
 from mfs.users.managers import UsersManager
+from mfs.groups.managers import GroupManager
 
 
 class NodesManager(BaseManager):
     serializer = NodeSerializer
+
+    def admin_queryset(self, pid):
+        uid, _ = clib.user_data(self.request, UsersManager)
+        groups = [i['id'] for i in GroupManager(None).ls()['result']]
+        queryset = self.serializer.Meta.model.children(
+            uid, groups, pid)
+        return queryset
 
 
 class ImageManager(NodesManager):

@@ -95,6 +95,21 @@ class ImageViewSet(NodesViewSet):
         return response
 
 
+class NodesListView(ListAPIView):
+    paginate_by = None
+    filter_backends = (srch.MongoSearchFilter,)
+    serializer_class = srls.NodeSerializerList
+
+    def get(self, request, *args, **kwargs):
+        if not permissions.IsAdminUser():
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super(NodesListView, self).get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        pid = self.kwargs.get('nid')
+        return nds.NodesManager(self.request).admin_queryset(pid)
+
+
 class ImagesListView(ListAPIView):
     paginate_by = None
     filter_backends = (srch.MongoSearchFilter,)

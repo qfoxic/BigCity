@@ -96,7 +96,6 @@ class ImageViewSet(NodesViewSet):
 
 
 class NodesListView(ListAPIView):
-    paginate_by = None
     filter_backends = (srch.MongoSearchFilter,)
     serializer_class = srls.NodeSerializerList
 

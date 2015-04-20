@@ -35,7 +35,7 @@ class ImageSerializer(NodeSerializer):
 class NodeSerializerList(NodeSerializer):
     class Meta(NodeSerializer.Meta):
         model = Node
-        fields = ('id', 'title', 'perm', 'uid',
+        fields = ('id', 'perm', 'uid', 'kind',
                   'gid', 'parent', 'path', 'created', 'updated')
 
 

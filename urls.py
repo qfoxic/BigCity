@@ -31,7 +31,7 @@ urlpatterns += patterns('',
     url(r'^categories/', CategoryListView.as_view(), name='root-categories'),
     url(r'^adverts/(?P<category_id>\w{24})/', PaginatedAdvertsView.as_view(), name='adverts'),
     url(r'^images/(?P<advert_id>\w{24})/', ImagesListView.as_view(), name='images'),
-    url(r'^node/$', NodesListView.as_view(), name='nodes'),
+    url(r'^nodes/$', NodesListView.as_view(), name='nodes'),
     url(r'^groups/', GroupListViewSet.as_view(), name='groups'),
     url(r'^users/', UserListViewSet.as_view(), name='users')
 )

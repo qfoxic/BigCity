@@ -33,7 +33,7 @@ class MongoSearchFilter(BaseFilterBackend):
         """
         There are few rules that convert search fields to querysets.
         We have following operators for numerics:
-        gt = >,gte = >=, lt = <, lte = <=, eq = ==, 
+        gt = >,gte = >=, lt = <, lte = <=, eq = ==,
         Search for numerics are always and.
         """
         if field_value.startswith('gt'):
@@ -71,60 +71,3 @@ class MongoSearchFilter(BaseFilterBackend):
             queryset = queryset.filter(reduce(operator.and_, and_queries))
 
         return queryset
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 0 1 2 3 4 5 6 7 8 9 0 . () and or > < = <= >=
-# abcdefghijklmnopqrstuvwxyz_
-
-# expr ::= item {op-bool item}
-# op-bool ::= and | or
-# item ::= ident {op-sign factor}
-# op-sign ::= >|<|>=|<=|=
-# factor ::= number|(expr)
-# number ::= digit|digit number
-# ident ::= letter {letter|digit}
-# digit ::= 0|1|2|3|4|5|6|7|8|9
-# letter ::= a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|_
-#
-#
-#
-
-
-
-
-
-
-

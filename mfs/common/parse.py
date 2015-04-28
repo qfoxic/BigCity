@@ -1,7 +1,7 @@
 from mongoengine import Q
 from pyparsing import (
     CaselessLiteral, Word, delimitedList, Optional,
-    Combine, Group, alphas, nums, alphanums, ParseException, Forward, oneOf, quotedString,
+    Combine, Group, alphas, nums, alphanums, Forward, oneOf, quotedString,
     ZeroOrMore, Keyword
 )
 
@@ -13,16 +13,14 @@ MONGO_BINARY_OPERATIONS = {
     '>=': 'gte',
     '<=': 'lte',
     'in': 'in',
-    '=': ''
+    '=': '',
+    'is': 'not__exists',
+    'isnot': 'exists'
 }
 
 
-#def test(s):
-#    try:
-#        tokens = simpleSQL.parseString(s)
-#    except ParseException:
-#        return
-#    return tokens
+def to_mongo(expr):
+    return selectStmt.parseString('where {}'.format(expr))
 
 
 def parseWhereCond(strng, location, token):
@@ -32,7 +30,9 @@ def parseWhereCond(strng, location, token):
         if op == 'in':
             values = map(lambda x: x.strip('"\''), t[3:-1])
         elif op == '=':
-            return Q(**{'{}'.format(field): values})
+            return Q(**{'{}'.format(field): values.strip('"\'')})
+        elif op == 'is':
+            values = True
         return Q(**{'{}__{}'.format(field, MONGO_BINARY_OPERATIONS[op]): values})
     else:
         try:
@@ -60,20 +60,17 @@ def parseWhereExpr(strng, loc, token):
 
 
 selectStmt = Forward()
-selectToken = Keyword('select', caseless=True)
-fromToken = Keyword('from', caseless=True)
 
 ident = Word(alphas, alphanums).setName('identifier')
 columnName = delimitedList(ident)
-columnNameList = Group(delimitedList(columnName))
-tableName = delimitedList(ident)
-tableNameList = Group(delimitedList(tableName))
 
 whereExpression = Forward()
 and_ = Keyword('and', caseless=True)
 or_ = Keyword('or', caseless=True)
 in_ = Keyword('in', caseless=True)
-binop = oneOf('= != < > >= <=')
+null = Keyword('NULL', caseless=True)
+
+binop = oneOf('= != < > >= <= is isnot')
 arithSign = Word('+-', exact=1)
 
 realNum = Combine(
@@ -83,8 +80,9 @@ realNum = Combine(
     )
 )
 
+
 intNum = Combine(Optional(arithSign) + Word(nums))
-columnRval = realNum | intNum | quotedString
+columnRval = realNum | intNum | quotedString | null
 
 whereCondition = Group(
     (columnName + binop + columnRval) |
@@ -100,12 +98,8 @@ whereExpression << Group(
 
 # define the grammar
 selectStmt << (
-    selectToken + ('*' | columnNameList).setResultsName('columns') +
-    fromToken +
-    tableNameList.setResultsName('tables') +
-    Optional(Group(CaselessLiteral('where') + whereExpression), '').setResultsName('where'))
-
-#simpleSQL = selectStmt
+    Optional(Group(CaselessLiteral('where') + whereExpression), '').setResultsName('where')
+)
 
 
 #parsed = test('select col1, col2 from table where o1 > 1 or a2 >= 1 and (c3<1 or b4>=1 and d5 > 1 or (aBc6=1 and adc7=1)) and bn=1 or ac in (1, 2, "asddasdasda")')

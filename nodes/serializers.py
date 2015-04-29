@@ -41,7 +41,8 @@ class AdvertSerializer(NodeSerializer):
                                          data.get('region', ''),
                                          data.get('city', ''),
                                          data.get('street', ''))
-        self.resolve_to_geo(country, region, city, street)
+        if not self.validated_data.get('loc'):
+            self.resolve_to_geo(country, region, city, street)
         return super(AdvertSerializer, self).save(**kwargs)
 
 

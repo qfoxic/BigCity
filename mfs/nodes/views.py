@@ -15,6 +15,16 @@ import mfs.common.utils as clib
 import mfs.common.constants as co
 import mfs.common.search as srch
 
+from mfs.common.utils import user_data
+from mfs.users.managers import UsersManager
+from nodes.serializers import AdvertListSerializer, CategoryListSerializer
+
+
+SERIALIZERS_LIST_MAP = {
+    'category': CategoryListSerializer,
+    'advert': AdvertListSerializer,
+}
+
 
 class NodesViewSet(vws.BaseViewSet):
     permission_classes = [permissions.IsAuthenticated,]
@@ -96,25 +106,32 @@ class ImageViewSet(NodesViewSet):
 
 
 class NodesListView(ListAPIView):
-    filter_backends = (srch.MongoSearchFilter,)
-    serializer_class = srls.NodeSerializerList
+    filter_backends = (srch.MongoExpressionFilter,)
 
-    def get(self, request, *args, **kwargs):
-        if not permissions.IsAdminUser():
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        return super(NodesListView, self).get(request, *args, **kwargs)
+    def get_serializer_class(self):
+        return SERIALIZERS_LIST_MAP.get(self.kwargs['kind'])
 
     def get_queryset(self):
-        pid = self.kwargs.get('nid')
-        return nds.NodesManager(self.request).admin_queryset(pid)
+        table = self.request.GET.get('table', 'nodes')
+        # Table params: ?tparams=lat=123,lon=123
+        params = self.request.GET.get('tparams', {})
+        uid, gids = user_data(self.request, UsersManager)
+        if params:
+            try:
+                params = {i.split('=')[0]: i.split('=')[1] for i in params.split(',')}
+            except IndexError:
+                params = {}
+        params.update({'uid': uid, 'gids': gids})
+        return getattr(self.get_serializer_class().Meta.model, table)(**params)
 
 
 class ImagesListView(ListAPIView):
     paginate_by = None
-    filter_backends = (srch.MongoSearchFilter,)
+    filter_backends = (srch.MongoExpressionFilter,)
     serializer_class = srls.ImageSerializerList
 
     def get_queryset(self):
         pid = self.kwargs.get('advert_id')
-        content_type = self.request.get('asset_type', 'image')
-        return nds.ImageManager(self.request).assets_queryset(pid, content_type)
+        uid, gids = user_data(self.request, UsersManager)
+        params = {'pid': pid,'uid': uid, 'gids': gids}
+        return getattr(self.get_serializer_class().Meta.model, 'children')(**params)

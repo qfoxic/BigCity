@@ -141,7 +141,9 @@ class AdvertTests(APITestCase):
     def test_finished_adverts_list(self):
         uid = self._createAndLoginUser('wwwbnv@uke.nee11')
         pid1, pid2, pid3, pid4, pid5, pid6, cat = self._createTree(uid)
-        response = self.client.get('/adverts/{}/'.format(cat), format='json')
+        response = self.client.get('/nodes/advert/',
+            {'where': '(finished is null or finished > "{}")'.format(datetime.datetime.now())},
+            format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 3)
         self._removeNodes('advert', pid1, pid2, pid3, pid4, pid5, pid6)

@@ -37,4 +37,11 @@ class Advert(Node):
 
     text = fields.StringField(max_length=5000)
 
+    meta = {
+        'indexes': [('kind', 'uid', 'gid', 'loc'),
+                    ('uid', 'gid', 'loc'),
+                    ('kind', 'uid', 'gid', 'parent', 'loc'),
+                    ('kind', 'uid', 'gid', 'path', 'loc')]
+    }
+
 

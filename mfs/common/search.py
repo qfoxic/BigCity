@@ -1,8 +1,8 @@
-import operator
 import bson
 
 from mongoengine import Q
 from rest_framework.filters import BaseFilterBackend
+from mfs.common import parse
 
 
 def search_nodes(queryset, kind, uid, gids):
@@ -28,46 +28,11 @@ def search_children(queryset, kind, uid, gids, pid, direct=True):
         path__startswith=pid)
 
 
-class MongoSearchFilter(BaseFilterBackend):
-    def construct_search(self, field_name, field_value):
-        """
-        There are few rules that convert search fields to querysets.
-        We have following operators for numerics:
-        gt = >,gte = >=, lt = <, lte = <=, eq = ==,
-        Search for numerics are always and.
-        """
-        if field_value.startswith('gt'):
-            return {'{}__gt'.format(field_name): field_value.strip('gt ')}
-        elif field_value.startswith('gte'):
-            return {'{}__gte'.format(field_name): field_value.strip('gte ')}
-        elif field_value.startswith('lt'):
-            return {'{}__lt'.format(field_name): field_value.strip('lt ')}
-        elif field_value.startswith('lte'):
-            return {'{}__lte'.format(field_name): field_value.strip('lte ')}
-        elif field_value.startswith('eq'):
-            return {'{}__eq'.format(field_name): field_value.strip('eq ')}
-        elif field_value.startswith('sw'):
-            return {'{}__startswith'.format(field_name): field_value.strip('sw ')}
-        elif field_value.startswith('isw'):
-            return {'{}__istartswith'.format(field_name): field_value.strip('isw ')}
-        elif field_value.startswith('icns'):
-            return {'{}__icontains'.format(field_name): field_value.strip('icns ')}
-        elif field_value.startswith('cns'):
-            return {'{}__contains'.format(field_name): field_value.strip('cns ')}
-
+class MongoExpressionFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         data = request.GET
-        search_fields = getattr(view, 'search_fields', None)
-
-        if not search_fields:
-            return queryset
-
-        orm_lookups = [self.construct_search(field, data.get(field))
-                       for field in search_fields if data.get(field)]
-
-        and_queries = [Q(**orm_lookup)
-                       for orm_lookup in orm_lookups]
-        if and_queries:
-            queryset = queryset.filter(reduce(operator.and_, and_queries))
-
+        expr = data.get('where')
+        parsed = parse.to_mongo(expr)
+        if parsed.where[0]:
+            return queryset.filter(parsed.where[0][1])
         return queryset

@@ -32,8 +32,9 @@ def parseWhereCond(strng, location, token):
         elif op == '=':
             return Q(**{'{}'.format(field): values.strip('"\'')})
         elif op == 'is':
-            values = True
-        return Q(**{'{}__{}'.format(field, MONGO_BINARY_OPERATIONS[op]): values})
+            return Q(**{'{}__{}'.format(field, MONGO_BINARY_OPERATIONS[op]): True})
+        return Q(**{'{}__{}'.format(field, MONGO_BINARY_OPERATIONS[op]): values.strip('"\'')})
+
     else:
         try:
             left, op, right = t[1], t[2], t[3]

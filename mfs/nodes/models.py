@@ -58,6 +58,26 @@ class Node(Document):
     def children(cls, queryset, uid, gids, pid, direct=True, kind=None):
         return search_children(queryset, kind or cls.get_kind(), uid, gids, pid, direct)
 
+    @queryset_manager
+    def nearest(cls, queryset, uid, gids, lat, lon, kind=None):
+        try:
+            lon, lat = float(lon), float(lat)
+        except (TypeError, ValueError):
+            lon, lat = 0.0, 0.0
+        return search_nodes(queryset, kind or cls.get_kind(), uid, gids).filter(
+            loc__near=[lon, lat]
+        )
+
+    @queryset_manager
+    def within(cls, queryset, uid, gids, lat, lon, radius=10.0, kind=None):
+        try:
+            lon, lat, radius = float(lon), float(lat), float(radius)
+        except (TypeError, ValueError):
+            lon, lat, radius = 0.0, 0.0, 10.0
+        return search_nodes(queryset, kind or cls.get_kind(), uid, gids).filter(
+            loc__geo_within_center=[(lon, lat), radius]
+        )
+
 
 class Image(Node):
     parent = fields.ReferenceField('Node', reverse_delete_rule=CASCADE)

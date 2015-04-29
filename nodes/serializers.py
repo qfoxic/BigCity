@@ -9,16 +9,17 @@ class CategorySerializer(NodeSerializer):
         fields = ('id', 'parent', 'path', 'title', 'perm', 'uid', 'gid')
 
     def to_representation(self, instance):
-        has_children = instance.__class__.children(instance.uid, [instance.gid],
-                                                   instance.id).count()
+        has_children = instance.__class__.has_children(instance.uid, [instance.gid],
+                                                       instance.id)
         res = super(CategorySerializer, self).to_representation(instance)
-        res['has_children'] = bool(has_children)
+        res['has_children'] = has_children
         return res
 
 
 class CategoryListSerializer(CategorySerializer):
     class Meta(NodeSerializer.Meta):
-        pass
+        model = Category
+        fields = ('id', 'parent', 'path', 'title', 'perm', 'uid', 'gid', 'kind')
 
 
 class AdvertSerializer(NodeSerializer):
@@ -49,5 +50,5 @@ class AdvertSerializer(NodeSerializer):
 class AdvertListSerializer(NodeSerializer):
     class Meta(NodeSerializer.Meta):
         model = Advert
-        fields = NodeSerializer.Meta.fields + ('title', 'price', 'city')
-        read_only_fields = NodeSerializer.Meta.fields + ('title', 'price', 'city')
+        fields = NodeSerializer.Meta.fields + ('title', 'price', 'city', 'kind')
+        read_only_fields = NodeSerializer.Meta.fields + ('title', 'price', 'city', 'kind')

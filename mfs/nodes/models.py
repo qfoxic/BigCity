@@ -1,7 +1,7 @@
 import datetime
 from mongoengine import Document, fields, NULLIFY, CASCADE, queryset_manager
 from mfs.common.constants import UMASK
-from mfs.common.search import search_nodes, search_children
+from mfs.common.search import search_nodes, search_children, has_children
 
 
 class Node(Document):
@@ -51,12 +51,16 @@ class Node(Document):
         return cls.__name__.lower()
 
     @queryset_manager
-    def nodes(cls, queryset, uid, gids, kind=None):
-        return search_nodes(queryset, kind or cls.get_kind(), uid, gids)
+    def nodes(cls, queryset, uid, gids):
+        return search_nodes(queryset, cls.get_kind(), uid, gids)
 
     @queryset_manager
     def children(cls, queryset, uid, gids, pid, direct=True, kind=None):
         return search_children(queryset, kind or cls.get_kind(), uid, gids, pid, direct)
+
+    @queryset_manager
+    def has_children(cls, queryset, uid, gids, pid):
+        return has_children(queryset, pid, None, uid, gids)
 
     @queryset_manager
     def nearest(cls, queryset, uid, gids, lat, lon, kind=None):

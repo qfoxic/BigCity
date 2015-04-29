@@ -109,7 +109,7 @@ class NodesListView(ListAPIView):
     filter_backends = (srch.MongoExpressionFilter,)
 
     def get_serializer_class(self):
-        return SERIALIZERS_LIST_MAP.get(self.kwargs['kind'])
+        return SERIALIZERS_LIST_MAP[self.kwargs['kind']]
 
     def get_queryset(self):
         table = self.request.GET.get('table', 'nodes')

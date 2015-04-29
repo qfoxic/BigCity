@@ -7,7 +7,7 @@ from mfs.common import parse
 
 def search_nodes(queryset, kind, uid, gids):
     if kind:
-        fltr = Q(kind=kind) | Q(uid=uid) | Q(gid__in=gids)
+        fltr = Q(kind=kind) & (Q(uid=uid) | Q(gid__in=gids))
     else:
         fltr = Q(uid=uid) | Q(gid__in=gids)
     return queryset.filter(fltr
@@ -26,6 +26,12 @@ def search_children(queryset, kind, uid, gids, pid, direct=True):
             parent__exists=False)
     return search_nodes(queryset, kind, uid, gids).filter(
         path__startswith=pid)
+
+
+def has_children(queryset, pid, kind, uid, gids):
+        pid = bson.ObjectId(pid) if pid else None
+        cldrn = search_children(queryset, kind, uid, gids, pid).limit(1).count()
+        return bool(cldrn)
 
 
 class MongoExpressionFilter(BaseFilterBackend):

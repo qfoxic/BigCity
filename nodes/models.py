@@ -13,7 +13,7 @@ class Category(Node):
     title = fields.StringField(required=True, max_length=3000)
 
 
-class Advert(Node):
+class Advert(Category):
     parent = fields.ReferenceField('Category', reverse_delete_rule=CASCADE)
     title = fields.StringField(required=True, max_length=300)
 

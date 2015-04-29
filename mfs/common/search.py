@@ -32,7 +32,11 @@ class MongoExpressionFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         data = request.GET
         expr = data.get('where')
+        order = data.get('order')
         parsed = parse.to_mongo(expr)
+        query = queryset
         if parsed.where[0]:
-            return queryset.filter(parsed.where[0][1])
-        return queryset
+            query = queryset.filter(parsed.where[0][1])
+        if order:
+            query = query.order_by(*order.split(','))
+        return query

@@ -1,4 +1,6 @@
-from mongoengine import fields, NULLIFY, CASCADE
+import datetime
+from mongoengine import fields, NULLIFY, CASCADE, queryset_manager, Q
+from mfs.common.search import search_nodes
 from mfs.nodes.models import Node
 
 
@@ -44,4 +46,8 @@ class Advert(Node):
                     ('kind', 'uid', 'gid', 'path', 'loc')]
     }
 
+    @queryset_manager
+    def nodes(cls, queryset, uid, gids, kind=None):
+        return search_nodes(queryset, kind or cls.get_kind(), uid, gids).filter(
+            Q(finished__exists=False) | Q(finished__gt=datetime.datetime.now()))
 

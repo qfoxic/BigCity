@@ -29,6 +29,7 @@ def parseWhereCond(strng, location, token):
         field, op, values = t[0], t[1], t[2]
         if op == 'in':
             values = map(lambda x: x.strip('"\''), t[3:-1])
+            return Q(**{'{}__{}'.format(field, MONGO_BINARY_OPERATIONS[op]): values})
         elif op == '=':
             return Q(**{'{}'.format(field): values.strip('"\'')})
         elif op == 'is':

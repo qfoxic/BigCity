@@ -63,9 +63,11 @@ class AssetTests(APITestCase):
             response = self.client.delete('/{}/{}/'.format(t, i))
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_node_data(self):
+    def est_node_data(self):
         uid = self._createUser('wwwbnv@uke.nee1')
         self._loginUser('wwwbnv@uke.nee1')
-        cat, _, _ = self._createTree(uid)
-        #self._removeNodes('category', cat)
+        cat, pid, aid = self._createTree(uid)
+        self._removeNodes('category', cat)
+        #self._removeNodes('advert', pid)
+        #self._removeNodes('image', aid)
 

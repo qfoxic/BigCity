@@ -135,7 +135,7 @@ class NodeTests(APITestCase):
         self._createAndAddGroup('test', uid)
         self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
-        response = self.client.get('/categories/', {'title': 'swCategory'},
+        response = self.client.get('/nodes/category/', {'where': 'title="swCategory"'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data
@@ -147,7 +147,7 @@ class NodeTests(APITestCase):
         self._createAndAddGroup('test', uid)
         self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
-        response = self.client.get('/categories/', {'title': 'cnsegor'},
+        response = self.client.get('/nodes/category/', {'where': 'title="cnsegor"'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data
@@ -159,10 +159,10 @@ class NodeTests(APITestCase):
         self._createAndAddGroup('test', uid)
         self._loginUser('wwwbnv@uke.nee1')
         pid1, pid2, pid3 = self._createTree(uid)
-        response = self.client.get('/categories/', {'title': 'cnswwwwwwwww'},
+        response = self.client.get('/nodes/category/', {'where': 'title="cnswwwwwwwww"'},
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.data
+        data = response.data['results']
         self.assertFalse(len(data))
         self._removeNodes(pid1, pid2, pid3)
 

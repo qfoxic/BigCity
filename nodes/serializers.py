@@ -9,10 +9,11 @@ class CategorySerializer(NodeSerializer):
         fields = ('id', 'parent', 'path', 'title', 'perm', 'uid', 'gid')
 
     def to_representation(self, instance):
-        has_children = instance.__class__.has_children(instance.uid, [instance.gid],
-                                                       instance.id)
+        #has_children = instance.__class__.has_children(instance.uid, [instance.gid],
+        #                                               instance.id)
+        #TODO. children is a bottleneck in the code
         res = super(CategorySerializer, self).to_representation(instance)
-        res['has_children'] = has_children
+        res['has_children'] = True#has_children
         return res
 
 

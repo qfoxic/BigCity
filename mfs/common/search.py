@@ -1,17 +1,16 @@
 import bson
 
-from mongoengine import Q
 from rest_framework.filters import BaseFilterBackend
 from mfs.common import parse
 
 
 def search_nodes(queryset, kind, uid, gids):
+    where = ('(this.uid=={}&&(1*this.perm[0])&4) || '
+             '(({}.indexOf(this.gid) != -1)&&(1*this.perm[1])&4) || '
+             '((1*this.perm[2])&4)'.format(uid, gids))
     if kind:
-        fltr = Q(kind=kind) & (Q(uid=uid) | Q(gid__in=gids))
-    else:
-        fltr = Q(uid=uid) | Q(gid__in=gids)
-    return queryset.filter(fltr
-        ).where('((1*this.perm[0])&4) || ((1*this.perm[1])&4) || ((1*this.perm[2])&4)')
+        return queryset.filter(kind=kind).where(where)
+    return queryset.where(where)
 
 
 def search_children(queryset, kind, uid, gids, pid, direct=True):
@@ -29,9 +28,9 @@ def search_children(queryset, kind, uid, gids, pid, direct=True):
 
 
 def has_children(queryset, pid, kind, uid, gids):
-        pid = bson.ObjectId(pid) if pid else None
-        cldrn = search_children(queryset, kind, uid, gids, pid).limit(1).count()
-        return bool(cldrn)
+    pid = bson.ObjectId(pid) if pid else None
+    cldrn = search_children(queryset, kind, uid, gids, pid).limit(1).count()
+    return bool(cldrn)
 
 
 class MongoExpressionFilter(BaseFilterBackend):

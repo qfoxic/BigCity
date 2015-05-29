@@ -23,7 +23,8 @@ class Node(Document):
 
     meta = {
         'allow_inheritance': True,
-        'indexes': [('kind', 'uid', 'gid'),
+        'indexes': [('kind'),
+                    ('kind', 'uid', 'gid'),
                     ('uid', 'gid'),
                     ('kind', 'uid', 'gid', 'parent'),
                     ('kind', 'uid', 'gid', 'path')],

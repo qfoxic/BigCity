@@ -15,7 +15,7 @@ drouter.register(r'user', RegularUserViewSet, base_name='user')
 drouter.register(r'logout', UserLogoutView, base_name='logout')
 drouter.register(r'login', UserLoginView, base_name='login')
 
-drouter.register(r'node', NodesViewSet, base_name='node') # TODO. For tests only.
+drouter.register(r'node', NodesViewSet, base_name='node')
 
 drouter.register(r'category', CategoryViewSet, base_name='category')
 drouter.register(r'advert', AdvertViewSet, base_name='advert')

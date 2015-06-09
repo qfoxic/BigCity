@@ -43,5 +43,6 @@ class AdvertSerializer(NodeSerializer):
 class AdvertListSerializer(NodeSerializer):
     class Meta(NodeSerializer.Meta):
         model = Advert
+        depth = 2
         fields = NodeSerializer.Meta.fields + ('title', 'price', 'city', 'kind')
         read_only_fields = NodeSerializer.Meta.fields + ('title', 'price', 'city', 'kind')

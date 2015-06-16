@@ -15,7 +15,8 @@ MONGO_BINARY_OPERATIONS = {
     'in': 'in',
     '=': '',
     'is': 'not__exists',
-    'isnot': 'exists'
+    'isnot': 'exists',
+    'like': 'contains'
 }
 
 
@@ -72,7 +73,7 @@ or_ = Keyword('or', caseless=True)
 in_ = Keyword('in', caseless=True)
 null = Keyword('NULL', caseless=True)
 
-binop = oneOf('= != < > >= <= is isnot')
+binop = oneOf('= != < > >= <= is isnot like')
 arithSign = Word('+-', exact=1)
 
 realNum = Combine(

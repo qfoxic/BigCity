@@ -7,6 +7,134 @@ from rest_framework.test import APITestCase
 from rest_framework.test import APIClient
 
 
+def createTestData():
+    import random
+    client = APIClient()
+    user = {'username': 'test@testovich.com', 'email': 'test@testovich.com',
+                'first_name': 'tets', 'last_name': 'tetete',
+                'resume': 'super_file', 'password': '1234567890'}
+    response = client.post('/user/', user, format='json')
+    uid = response.data['result']['id']
+    client.post('/login/', {'username': 'test@testovich.com',
+                            'password': '1234567890'},
+                         format='json')
+    client.login(username='test@testovich.com', password='qwerty')
+    categories = [
+        {'uid': uid, 'perm': '666', 'title': 'Automobiles',
+         'sub': [
+            {'uid': uid, 'perm': '666', 'title': 'Audi'},
+            {'uid': uid, 'perm': '666', 'title': 'Skoda'},
+            {'uid': uid, 'perm': '666', 'title': 'BMW'},
+            {'uid': uid, 'perm': '666', 'title': 'Opel'},
+            ]},
+        {'uid': uid, 'perm': '666', 'title': 'Buildings',
+         'sub': [
+            {'uid': uid, 'perm': '666', 'title': 'New'},
+            {'uid': uid, 'perm': '666', 'title': 'Secondary'},
+            ]},
+        {'uid': uid, 'perm': '666', 'title': 'Books',
+         'sub': [
+            {'uid': uid, 'perm': '666', 'title': 'Shevchenko'},
+            {'uid': uid, 'perm': '666', 'title': 'Franko'},
+            ]},
+        {'uid': uid, 'perm': '666', 'title': 'School',
+                 'sub': [
+            {'uid': uid, 'perm': '666', 'title': 'High School'},
+            {'uid': uid, 'perm': '666', 'title': 'Middle'},
+            {'uid': uid, 'perm': '666', 'title': 'Colledge'},
+            ]},
+        {'uid': uid, 'perm': '666', 'title': 'Sport',
+                 'sub': [
+            {'uid': uid, 'perm': '666', 'title': 'Aikido'},
+            ]},
+        {'uid': uid, 'perm': '666', 'title': 'Trips',
+         'sub': [
+            {'uid': uid, 'perm': '666', 'title': 'Ukraine'},
+            ]},
+        {'uid': uid, 'perm': '666', 'title': 'Cities',
+         'sub': [
+            {'uid': uid, 'perm': '666', 'title': 'London'},
+            {'uid': uid, 'perm': '666', 'title': 'Kyiv'},
+            {'uid': uid, 'perm': '666', 'title': 'Paris'},
+            {'uid': uid, 'perm': '666', 'title': 'Sambir'},
+            ]},
+        {'uid': uid, 'perm': '666', 'title': 'Companies',
+         'sub': [
+            {'uid': uid, 'perm': '666', 'title': 'NIX'},
+            {'uid': uid, 'perm': '666', 'title': 'EPAM'},
+            {'uid': uid, 'perm': '666', 'title': 'Google'},
+            {'uid': uid, 'perm': '666', 'title': 'Microsoft'},
+            ]},
+    ]
+    pidcats = []
+    print 'Generating categories'
+    for c in categories:
+        resp = client.post('/category/', c, format='json')
+        print resp
+        pidcat = resp.data['result']['id']
+        pidcats.append(pidcat)
+        for s in c['sub']:
+            s['parent'] = pidcat
+            resp = client.post('/category/', s, format='json')
+            subpidcat = resp.data['result']['id']
+            pidcats.append(subpidcat)
+
+    print 'Generating adverts'
+    locations = [{'country': 'Ukraine', 'city': 'Sambir', 'loc': (23.1968986,49.522311)},
+                 {'country': 'Ukraine', 'city': 'Sambir', 'loc': (23.1968912,49.522300)},
+                 {'country': 'Ukraine', 'city': 'Lviv', 'loc': (24.0122356,49.8326891)},
+                 {'country': 'Ukraine', 'city': 'Kyiv', 'loc': (30.5326905, 50.4020355)},
+                 {'country': 'Ukraine', 'city': 'Donetsk', 'loc': (37.7615206, 47.9901174)},
+                 {'country': 'Ukraine', 'city': 'Rivne', 'loc': (26.2652575,50.6191895)},
+                 {'country': 'Ukraine', 'city': 'Rivne', 'loc': (26.265258,50.619188)},
+                 {'country': 'Ukraine', 'city': 'Dnipropetrovsk', 'loc': (35.0003565,48.4622985)},
+                 {'country': 'Ukraine', 'city': 'Dnipropetrovsk', 'loc': (35.0003569,48.4622785)}]
+
+    data = {'uid': None, 'perm': '666', 'title': 'Advert1', 'parent': None,
+            'rooms': 3, 'square_gen': 70, 'square_live': 60,
+            'room_height': 2, 'floors': 9, 'floor': 2, 'wall_type': 1,
+            'build_type': 1, 'price': None,
+            'text': 'Hello this is a super randomly generated advert'}
+    texts = [
+             '''He was found guilty of bribery, abuse of power and "intentionally disclosing
+                national secrets", China's official Xinhua news agency reports.
+                Until his retirement in 2012, Zhou was one of China's most powerful men.
+                He was put under investigation one year later as part of President Xi
+                Jinping's major anti-corruption campaign.
+                State TV showed a clip of Zhou, 72, pleading guilty at a closed-door trial in
+                the northern city of Tianjin. When responding to the judge, he said he would not
+                launch an appeal. "I've realised the harm I've caused to the party and the people.
+                I plead guilty and I regret my crimes," he said.''',
+                '''After all, Zhou Yongkang had held a seat at the very top of the Chinese 
+                government pyramid. If he was thoroughly corrupt, some in China might ask whether
+                others at the top were rotten too.
+                In the end, the decision to keep Zhou Yongkang's trial secret matches the case
+                surrounding him, and Zhou's own public persona: inaccessible and secretive.
+                ''',
+                '''has been welcoming of the conviction, with one user commenting: "Haha! Put the
+                old tiger in the cage!"
+                The jibe is a reference to President Xi Jinping's promise to crack down on both
+                "tigers and flies" - meaning officials at all levels - in his fight against
+                corruption.
+                Zhou was charged in April, nine months after a formal investigation was announced.
+                He has since been expelled from the Communist Party.
+                '''
+                ]
+    for _ in xrange(0, 50000):
+        data.update(random.choice(locations))
+        data['parent'] = random.choice(pidcats)
+        data['price'] = round(float(random.triangular(100, 1000)),2)
+        data['uid'] = random.randint(1, 50)
+        data['text'] = random.choice(texts)
+        data['title'] = 'Some title '+ data['parent']
+        data['rooms'] = random.randint(1, 4)
+        data['square_gen'] = random.randint(30, 100)
+        data['square_live'] = data['square_gen'] - random.randint(10, 15)
+        data['room_height'] = round(float(random.triangular(1, 4)),2)
+        data['floor'] = random.randint(1, 9)
+        client.post('/advert/', data, format='json')
+
+
 class AdvertTests(APITestCase):
     def setUp(self):
         Users.objects.create_superuser('wwwbnv@uke.nee', 'wwwbnv@uke.nee', 'qwerty')
@@ -121,7 +249,6 @@ class AdvertTests(APITestCase):
         self._removeNodes('node', cat_id)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # Test location.
     def test_update_advert_node(self):
         uid = self._createAndLoginUser('wwwbnv@uke.nee11')
         pid1, pid2, pid3, pid4, pid5, pid6, cat = self._createTree(uid)
@@ -168,7 +295,6 @@ class AdvertTests(APITestCase):
         self._removeNodes('category', cat)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data['count'])
-
 
     def test_city_location(self):
         uid = self._createAndLoginUser('wwwbnv@uke.nee11')
@@ -234,4 +360,4 @@ class AdvertTests(APITestCase):
         self._removeNodes('advert', pid1, pid2, pid3, pid4, pid5, pid6)
         self._removeNodes('category', cat)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['results'][0]['price'], '100.00')
+        self.assertEqual(response.data['results'][0]['price'], 'uid.00')

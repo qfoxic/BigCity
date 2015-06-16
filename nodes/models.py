@@ -1,6 +1,6 @@
 import datetime
 from mongoengine import fields, NULLIFY, CASCADE, queryset_manager, Q
-from mfs.common.search import search_nodes
+from mfs.common.search import search_nodes, search_children
 from mfs.nodes.models import Node
 
 
@@ -34,20 +34,32 @@ class Advert(Category):
     build_type = fields.IntField(choices=BUILD_TYPES,
                                  required=True, default=BUILD_TYPES[0][0])
     price = fields.DecimalField()
-    # Price per duration. For instance, one day.
     finished = fields.DateTimeField()
 
+    #language field is needed for full text search.
+    language = fields.StringField(default='english')
     text = fields.StringField(max_length=5000)
 
     meta = {
-        'indexes': [('kind', 'uid', 'gid', 'loc'),
-                    ('uid', 'gid', 'loc'),
-                    ('kind', 'uid', 'gid', 'parent', 'loc'),
-                    ('kind', 'uid', 'gid', 'path', 'loc')]
+        'indexes': [('kind', 'path', 'loc', 'parent'),
+                    ('kind', 'path', 'loc', 'parent', 'finished')
+                    ]
     }
 
     @queryset_manager
-    def nodes(cls, queryset, uid, gids, kind=None):
-        return search_nodes(queryset, kind or cls.get_kind(), uid, gids).filter(
+    def nodes(cls, queryset, uid, gids):
+        return search_nodes(queryset, cls.get_kind(), uid, gids).filter(
             Q(finished__exists=False) | Q(finished__gt=datetime.datetime.now()))
 
+    @queryset_manager
+    def nearest(cls, queryset, uid, gids, lat, lon, parent):
+        try:
+            lon, lat = float(lon), float(lat)
+        except (TypeError, ValueError):
+            lon, lat = 0.0, 0.0
+        return search_children(
+            queryset, cls.get_kind(), uid,
+            gids, pid=parent, direct=False
+        ).filter(
+            loc__near=[lon, lat]
+        ).filter(Q(finished__exists=False) | Q(finished__gt=datetime.datetime.now()))

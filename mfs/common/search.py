@@ -24,7 +24,7 @@ def search_children(queryset, kind, uid, gids, pid, direct=True):
         return search_nodes(queryset, kind, uid, gids).filter(
             parent__exists=False)
     return search_nodes(queryset, kind, uid, gids).filter(
-        path__startswith=pid)
+        path__contains=pid)
 
 
 def has_children(queryset, pid, kind, uid, gids):

@@ -39,8 +39,6 @@ class UsersManager(BaseManager):
 
     def data(self, **kwargs):
         res = clib.get_obj(self.serializer, **kwargs)
-        if res.get('error'):
-            return clib.jsonerror(res['error'])
         srl = self.serializer(res['object'])
         gids = self.groups(res['object'].pk)
         resp = clib.jsonresult(srl.data)

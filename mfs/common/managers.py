@@ -4,7 +4,7 @@ from mfs.common.serializers import cast_serializer
 
 
 class BaseManager(object):
-    def __init__(self, request, serializer=None):
+    def __init__(self, request=None, serializer=None):
         self.request = request
         if serializer:
             self.serializer = serializer

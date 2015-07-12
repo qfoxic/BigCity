@@ -7,7 +7,7 @@ class RegularUserSerializer(UserSerializer):
     class Meta:
         model = Users
         fields = ('id', 'username', 'email', 'first_name', 'last_name',
-                  'is_active', 'resume', 'password')
+                  'is_active', 'resume', 'password', 'date_joined')
         write_only_fields = ('password',)
 
 

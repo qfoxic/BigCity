@@ -105,7 +105,7 @@ def createTestData():
                 the northern city of Tianjin. When responding to the judge, he said he would not
                 launch an appeal. "I've realised the harm I've caused to the party and the people.
                 I plead guilty and I regret my crimes," he said.''',
-                '''After all, Zhou Yongkang had held a seat at the very top of the Chinese 
+                '''After all, Zhou Yongkang had held a seat at the very top of the Chinese
                 government pyramid. If he was thoroughly corrupt, some in China might ask whether
                 others at the top were rotten too.
                 In the end, the decision to keep Zhou Yongkang's trial secret matches the case
@@ -133,6 +133,18 @@ def createTestData():
         data['room_height'] = round(float(random.triangular(1, 4)),2)
         data['floor'] = random.randint(1, 9)
         client.post('/advert/', data, format='json')
+
+
+def addImagesToAdvert(pid='5579d77ee138235570a06774', uid=2):
+    client = APIClient()
+    client.post('/login/', {'username': 'test@testovich.com',
+                            'password': '1234567890'},
+                         format='json')
+    with open('tests/test.jpg') as f:
+        asset = {'uid': uid, 'perm': '666', 'parent': pid,
+                 'title': 'Image 01', 'asset_type': 'image',
+                 'content_type': 'image/jpg', 'content': f}
+        client.post('/image/', asset)
 
 
 class AdvertTests(APITestCase):

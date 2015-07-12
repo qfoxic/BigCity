@@ -9,3 +9,6 @@ test:
 
 generate_data:
 	./manage.py test tests.test_advert.createTestData
+
+generate_image:
+	./manage.py test tests.test_advert.addImagesToAdvert

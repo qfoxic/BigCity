@@ -1,4 +1,6 @@
+from rest_framework import serializers
 from mfs.nodes.serializers import NodeSerializer
+from mfs.users.managers import UsersManager
 from nodes.models import Category, Advert
 from mfs.common.utils import address_to_geo
 
@@ -16,7 +18,10 @@ class CategoryListSerializer(CategorySerializer):
 
 
 class AdvertSerializer(NodeSerializer):
+    owner = serializers.SerializerMethodField('_owner')
+
     class Meta(NodeSerializer.Meta):
+        depth = 2
         model = Advert
         fields = NodeSerializer.Meta.fields + ('title', 'country', 'region',
                                                'city', 'street', 'loc',
@@ -24,7 +29,7 @@ class AdvertSerializer(NodeSerializer):
                                                'square_live', 'room_height',
                                                'floors', 'wall_type',
                                                'build_type', 'price',
-                                               'finished', 'text')
+                                               'finished', 'text', 'owner')
 
     def resolve_to_geo(self, *params):
         self.validated_data['loc'] = address_to_geo(*params)
@@ -38,6 +43,9 @@ class AdvertSerializer(NodeSerializer):
         if not self.validated_data.get('loc'):
             self.resolve_to_geo(country, region, city, street)
         return super(AdvertSerializer, self).save(**kwargs)
+
+    def _owner(self, obj):
+        return UsersManager().data(id=obj.uid)['result']
 
 
 class AdvertListSerializer(NodeSerializer):

@@ -1,2 +1,3 @@
 1. Optimize indexes.
 2. Investigate nested trees.
+3. Try to merge single node views into one under url: node/:kind/

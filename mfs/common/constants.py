@@ -10,7 +10,8 @@ UMASK = '644'
 
 DEFAULT_GROUP = 'default'
 ADMIN_GROUP = 'admin'
+DEFAULT_LANGUAGE = 'en'
 
-MAPS_URL = '/maps/api/geocode/json?address={}'
+MAPS_URL = '/maps/api/geocode/json?address={}&language={}'
 MAPS_HOST = 'maps.googleapis.com'
 

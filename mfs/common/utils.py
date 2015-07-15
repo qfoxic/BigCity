@@ -59,23 +59,42 @@ def check_perm(node, user, perm_to_check):
     return False
 
 
-def address_to_geo(*args):
+def address_to_geo(*args, **kwargs):
     headers = {
         'User-Agent': 'python-requests/2.2.1.CPython/2.7.6.Linux/3.13.0-39-generic',
         'Accept': '*/*',
         'Accept-Encoding': 'gzip,deflate,compress'
     }
     conn = httplib.HTTPConnection(co.MAPS_HOST)
+    additional = {}
     try:
         # We have to replace whitespaces with +.
-        conn.request('GET', co.MAPS_URL.format(','.join([i.strip().replace(' ', '+') for i in args])),
+        conn.request('GET', co.MAPS_URL.format(','.join([i.strip().replace(' ', '+') for i in args]),
+                                               co.DEFAULT_LANGUAGE),
                      '', headers)
         resp = conn.getresponse()
         converted = json.loads(resp.read())
+        ext = kwargs.get('extended')
         loc = converted['results'][0]['geometry']['location']
-    except (TypeError, IndexError):
-        return (0.0, 0.0)
-    except socket.error:
-        return (0.0, 0.0)
+        address = converted['results'][0]['formatted_address'].split(',')
+        if ext:
+            additional = {
+                'country': address[-1].strip(),
+                'state': address[-2].strip(),
+                'city': address[-3].strip(),
+                # Trick, usually address contains 3 part, sometimes 4 or 5. The very first always be street or city.
+                'street': address[0].strip()
+            }
 
+    except (TypeError, IndexError):
+        if ext:
+            return 0.0, 0.0, additional
+        return 0.0, 0.0
+    except socket.error:
+        if ext:
+            return 0.0, 0.0, additional
+        return 0.0, 0.0
+
+    if ext:
+        return loc['lng'], loc['lat'], additional
     return loc['lng'], loc['lat']

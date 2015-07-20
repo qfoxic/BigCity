@@ -11,7 +11,7 @@ class RegularUserSerializer(UserSerializer):
         model = Users
         fields = ('id', 'username', 'email', 'first_name', 'last_name',
                   'phone', 'gender', 'address', 'city', 'country', 'street', 'state', 'lat',
-                  'lng', 'is_active', 'resume', 'password', 'date_joined')
+                  'lng', 'is_active', 'resume', 'password', 'date_joined', 'last_login')
         write_only_fields = ('password',)
 
 

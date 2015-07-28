@@ -19,6 +19,7 @@ class ImageManager(NodesManager):
             except:
                 data = self.request.data
             data['content'] = self.request.data['content']
+            data['content_type'] = self.request.data['content'].content_type
             if kwargs:
                 data.update(kwargs)
             srl = self.serializer(data=data)

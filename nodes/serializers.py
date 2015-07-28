@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework import serializers
 from mfs.nodes.serializers import NodeSerializer
 from mfs.users.managers import UsersManager
@@ -45,7 +46,10 @@ class AdvertSerializer(NodeSerializer):
         return super(AdvertSerializer, self).save(**kwargs)
 
     def _owner(self, obj):
-        return UsersManager().data(id=obj.uid)['result']
+        try:
+            return UsersManager().data(id=obj.uid)['result']
+        except Http404:
+            return {}
 
 
 class AdvertListSerializer(NodeSerializer):

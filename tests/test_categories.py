@@ -18,6 +18,7 @@ class NodeTests(APITestCase):
         self.client.logout()
         data = {'username': username, 'email': username,
                 'first_name': 'tets', 'last_name': 'tetete',
+                'phone': '1234567890', 'gender': 'm',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

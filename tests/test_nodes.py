@@ -16,7 +16,7 @@ class NodeTests(APITestCase):
 
     def _createUser(self, username):
         self.client.logout()
-        data = {'username': username, 'email': username,
+        data = {'username': username, 'email': username, 'phone': '1234567890', 'gender': 'm',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', data, format='json')

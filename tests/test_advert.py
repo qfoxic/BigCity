@@ -159,6 +159,7 @@ class AdvertTests(APITestCase):
     def _createAndLoginUser(self, username):
         self.client.logout()
         data = {'username': username, 'email': username,
+                'phone': '1234567890', 'gender': 'm',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', data, format='json')
@@ -290,7 +291,7 @@ class AdvertTests(APITestCase):
         uid = self._createAndLoginUser('wwwbnv@uke.nee11')
         pid1, pid2, pid3, pid4, pid5, pid6, cat = self._createTree(uid)
         response = self.client.get('/nodes/advert/',
-            {'table': 'nearest', 'tparams':'lon=24.03,lat=49.85'},
+            {'table': 'nearest', 'tparams':'lon=24.03,lat=49.85,parent='+cat},
             format='json')
         self._removeNodes('advert', pid1, pid2, pid3, pid4, pid5, pid6)
         self._removeNodes('category', cat)
@@ -372,4 +373,4 @@ class AdvertTests(APITestCase):
         self._removeNodes('advert', pid1, pid2, pid3, pid4, pid5, pid6)
         self._removeNodes('category', cat)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['results'][0]['price'], 'uid.00')
+        self.assertEqual(response.data['results'][0]['price'], '100.00')

@@ -17,6 +17,7 @@ class UserTests(APITestCase):
     def test_correct_add_user(self):
         self.client.logout()
         data = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                'phone': '1234567890', 'gender': 'm',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', data, format='json')
@@ -44,6 +45,7 @@ class UserTests(APITestCase):
 
     def test_correct_update_user(self):
         data = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                'phone': '1234567890', 'gender': 'm',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', data, format='json')
@@ -65,6 +67,7 @@ class UserTests(APITestCase):
 
     def test_incorrect_update_user(self):
         data = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                'phone': '1234567890', 'gender': 'm',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', data, format='json')
@@ -84,6 +87,7 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         gid = response.data['result']['id']
         udata = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                 'phone': '1234567890', 'gender': 'm',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', udata, format='json')
@@ -104,6 +108,7 @@ class UserTests(APITestCase):
     def test_inexisted_add_group(self):
         gid = 123
         udata = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                 'phone': '1234567890', 'gender': 'm',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', udata, format='json')
@@ -123,6 +128,7 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         gid = response.data['result']['id']
         udata = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                 'phone': '1234567890', 'gender': 'm',
                  'first_name': 'tets', 'last_name': 'tetete',
                  'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', udata, format='json')
@@ -172,6 +178,7 @@ class UserTests(APITestCase):
 
     def test_ch_password(self):
         data = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                'phone': '1234567890', 'gender': 'm',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': 'QAZqaz1983'}
         response = self.client.post('/user/', data, format='json')
@@ -197,6 +204,7 @@ class UserTests(APITestCase):
 
     def test_rm_user(self):
         data = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                'phone': '1234567890', 'gender': 'm',
                 'first_name': 'tets', 'last_name': 'tetete',
                 'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', data, format='json')
@@ -215,6 +223,7 @@ class UserTests(APITestCase):
             gids.append(response.data['result']['id'])
         gid, gid1, gid2, gid3 = gids
         udata = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                 'phone': '1234567890', 'gender': 'm',
                  'first_name': 'tets', 'last_name': 'tetete',
                  'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', udata, format='json')
@@ -248,6 +257,7 @@ class UserTests(APITestCase):
             gids.append(response.data['result']['id'])
         gid, gid1, gid2 = gids
         udata = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                 'phone': '1234567890', 'gender': 'm',
                  'first_name': 'tets', 'last_name': 'tetete',
                  'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', udata, format='json')
@@ -282,6 +292,7 @@ class UserTests(APITestCase):
             gids.append(response.data['result']['id'])
         gid, gid1 = gids
         udata = {'username': 'wwww@www.www', 'email': 'wwww@www.www',
+                 'phone': '1234567890', 'gender': 'm',
                  'first_name': 'tets', 'last_name': 'tetete',
                  'resume': 'super_file', 'password': '1234567890'}
         response = self.client.post('/user/', udata, format='json')

@@ -101,6 +101,9 @@ MONGO_HOST = '0.0.0.0'
 MONGO_PORT = 27017
 
 from mongoengine import connect
+RUN_TESTS = os.environ['RUN_TESTS']
+if RUN_TESTS:
+    client = connect('tests_city', host=MONGO_HOST, port=MONGO_PORT)
 
 if DEBUG:
     client = connect('test_city', host=MONGO_HOST, port=MONGO_PORT)

@@ -79,11 +79,11 @@ def address_to_geo(*args, **kwargs):
         address = converted['results'][0]['formatted_address'].split(',')
         if ext:
             additional = {
-                'country': address[-1].strip(),
-                'state': address[-2].strip(),
-                'city': address[-3].strip(),
+                'country': address[-1].strip() if address else '',
+                'state': address[-2].strip() if len(address) > 1 else address[-1],
+                'city': address[-3].strip() if len(address) > 1 else address[-1],
                 # Trick, usually address contains 3 part, sometimes 4 or 5. The very first always be street or city.
-                'street': address[0].strip()
+                'street': address[0].strip() if address else ''
             }
 
     except (TypeError, IndexError):

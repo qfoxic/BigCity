@@ -52,7 +52,7 @@ class Advert(Category):
             Q(finished__exists=False) | Q(finished__gt=datetime.datetime.now()))
 
     @queryset_manager
-    def nearest(cls, queryset, uid, gids, lat, lon, parent):
+    def nearest(cls, queryset, uid, gids, lat, lon, parent=None):
         try:
             lon, lat = float(lon), float(lat)
         except (TypeError, ValueError):

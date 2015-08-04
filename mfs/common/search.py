@@ -18,13 +18,11 @@ def search_children(queryset, kind, uid, gids, pid, direct=True):
         try:
             pid = bson.ObjectId(pid) if pid else None
         except (TypeError, bson.errors.InvalidId):
-            pid = None
-        if pid:
-            return search_nodes(queryset, kind, uid, gids).filter(parent=pid)
-        return search_nodes(queryset, kind, uid, gids).filter(
-            parent__exists=False)
-    return search_nodes(queryset, kind, uid, gids).filter(
-        path__contains=pid)
+            return queryset
+        return search_nodes(queryset, kind, uid, gids).filter(parent=pid)
+    if pid is None:
+        return search_nodes(queryset, kind, uid, gids)
+    return search_nodes(queryset, kind, uid, gids).filter(path__contains=pid)
 
 
 def has_children(queryset, pid, kind, uid, gids):

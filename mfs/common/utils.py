@@ -67,6 +67,7 @@ def address_to_geo(*args, **kwargs):
     }
     conn = httplib.HTTPConnection(co.MAPS_HOST)
     additional = {}
+    ext = kwargs.get('extended')
     try:
         # We have to replace whitespaces with +.
         conn.request('GET', co.MAPS_URL.format(','.join([i.strip().replace(' ', '+') for i in args]),
@@ -74,7 +75,6 @@ def address_to_geo(*args, **kwargs):
                      '', headers)
         resp = conn.getresponse()
         converted = json.loads(resp.read())
-        ext = kwargs.get('extended')
         loc = converted['results'][0]['geometry']['location']
         address = converted['results'][0]['formatted_address'].split(',')
         if ext:

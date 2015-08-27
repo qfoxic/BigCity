@@ -86,7 +86,7 @@ def address_to_geo(*args, **kwargs):
                 'street': address[0].strip() if address else ''
             }
 
-    except (TypeError, IndexError):
+    except (TypeError, IndexError, ValueError):
         if ext:
             return 0.0, 0.0, additional
         return 0.0, 0.0

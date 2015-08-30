@@ -2,7 +2,7 @@ init:
 	workon bigcity 
 
 run:
-	./manage.py runserver 127.0.0.1:8001
+	./manage.py runserver 0.0.0.0:8001
 
 test:
 	RUN_TESTS=True ./manage.py test

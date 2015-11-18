@@ -27,10 +27,10 @@ class UserSerializer(serializers.ModelSerializer):
             return
 
         lng, lat, address = address_to_geo(validated_data['address'], extended=True)
-        validated_data['country'] = address.get('country')
-        validated_data['state'] = address.get('state')
-        validated_data['city'] = address.get('city')
-        validated_data['street'] = address.get('street')
+        validated_data['country'] = address.get('country') or validated_data.get('country')
+        validated_data['state'] = address.get('state') or validated_data.get('state')
+        validated_data['city'] = address.get('city') or validated_data.get('city')
+        validated_data['street'] = address.get('street') or validated_data.get('street')
         validated_data['lng'] = lng
         validated_data['lat'] = lat
 

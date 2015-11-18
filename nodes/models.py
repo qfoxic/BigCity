@@ -8,9 +8,13 @@ WALL_TYPES = ((0, 'Ferroconcrete'), (1, 'Brick'),)
 BUILD_TYPES = ((0, 'New'), (1, 'Secondary'),)
 
 
+BUILDINGS = 'buildings'
+
+
 class Category(Node):
     parent = fields.ReferenceField('Category', reverse_delete_rule=NULLIFY)
     title = fields.StringField(required=True, max_length=3000)
+    ctype = fields.StringField(required=False, default=BUILDINGS)
 
 
 class Advert(Category):
@@ -63,3 +67,25 @@ class Advert(Category):
         ).filter(
             loc__near=[lon, lat]
         ).filter(Q(finished__exists=False) | Q(finished__gt=datetime.datetime.now()))
+
+
+class Message(Node):
+    title = fields.StringField(required=True, max_length=300)
+    body = fields.StringField(required=True, max_length=2000)
+    country = fields.StringField(max_length=30)
+    region = fields.StringField(max_length=30)
+    city = fields.StringField(max_length=30)
+
+    @queryset_manager
+    def incoming(cls, queryset, uid, gids, country, region, city):
+        geo_filter = (
+            ((Q(country=country) & Q(region='') & Q(city='')) |
+            (Q(country=country) & Q(region=region) & Q(city='')) |
+            (Q(country=country) & Q(region=region) & Q(city=city)) |
+            Q(shared__in=[uid])) & Q(uid__ne=uid)
+        )
+        return search_nodes(queryset, cls.get_kind(), uid, gids).filter(geo_filter)
+
+    @queryset_manager
+    def my(cls, queryset, uid, gids):
+        return search_nodes(queryset, cls.get_kind(), uid, gids).filter(Q(uid=uid))

@@ -62,8 +62,8 @@ class UserViewSet(vws.BaseViewSet):
         group_manager = grp.GroupManager(request)
 
         ugids = self.manager.groups(pk)['result']
-        ugids = [i['id'] for i in  ugids]
-        gids = [i['id'] for i in  gids]
+        ugids = [i['id'] for i in ugids]
+        gids = [i['id'] for i in gids]
 
         added, failed, removed = [], [], []
         for ugid in ugids:

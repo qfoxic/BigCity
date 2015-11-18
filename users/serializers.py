@@ -17,3 +17,4 @@ class RegularUserSerializer(UserSerializer):
 
 class RegularUserManager(UsersManager):
     serializer = RegularUserSerializer
+

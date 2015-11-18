@@ -17,12 +17,13 @@ import mfs.common.search as srch
 
 from mfs.common.utils import user_data
 from mfs.users.managers import UsersManager
-from nodes.serializers import AdvertListSerializer, CategoryListSerializer
+from nodes.serializers import AdvertListSerializer, CategoryListSerializer, MessageListSerializer
 
 
 SERIALIZERS_LIST_MAP = {
     'category': CategoryListSerializer,
     'advert': AdvertListSerializer,
+    'message': MessageListSerializer
 }
 
 

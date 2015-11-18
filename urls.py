@@ -5,7 +5,7 @@ from mfs.users.views import UserLoginView, UserLogoutView, UserTokenLoginView, U
 from mfs.nodes.views import (NodesViewSet, ImageViewSet, ImagesListView, NodesListView)
 
 from users.views import RegularUserViewSet
-from nodes.views import (CategoryViewSet, AdvertViewSet)
+from nodes.views import (CategoryViewSet, AdvertViewSet, MessageViewSet)
 
 
 drouter = routers.DefaultRouter()
@@ -20,6 +20,7 @@ drouter.register(r'node', NodesViewSet, base_name='node')
 drouter.register(r'category', CategoryViewSet, base_name='category')
 drouter.register(r'advert', AdvertViewSet, base_name='advert')
 drouter.register(r'image', ImageViewSet, base_name='image')
+drouter.register(r'message', MessageViewSet, base_name='message')
 
 urlpatterns = drouter.urls
 

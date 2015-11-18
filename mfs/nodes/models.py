@@ -18,16 +18,18 @@ class Node(Document):
     # Parent record. Mongo object id.
     parent = fields.ReferenceField('self', reverse_delete_rule=NULLIFY)
     # Shared to uids.
-    shared = fields.ListField()
+    shared = fields.ListField(fields.IntField(min_value=1))
     gid = fields.IntField(required=True, min_value=1)
 
     meta = {
         'allow_inheritance': True,
-        'indexes': [('kind'),
-                    ('kind', 'uid', 'gid'),
-                    ('uid', 'gid'),
-                    ('kind', 'uid', 'gid', 'parent'),
-                    ('kind', 'uid', 'gid', 'path')],
+        'indexes': [
+            ('kind'),
+            ('kind', 'uid', 'gid'),
+            ('uid', 'gid'),
+            ('kind', 'uid', 'gid', 'parent'),
+            ('kind', 'uid', 'gid', 'path')
+        ],
     }
 
     def save(self, *args, **kwargs):

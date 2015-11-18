@@ -2,7 +2,7 @@ from django.http import Http404
 from rest_framework import serializers
 from mfs.nodes.serializers import NodeSerializer
 from mfs.users.managers import UsersManager
-from nodes.models import Category, Advert
+from nodes.models import Category, Advert, Message
 from mfs.common.utils import address_to_geo
 
 
@@ -58,3 +58,44 @@ class AdvertListSerializer(NodeSerializer):
         depth = 2
         fields = NodeSerializer.Meta.fields + ('title', 'price', 'city', 'kind')
         read_only_fields = NodeSerializer.Meta.fields + ('title', 'price', 'city', 'kind')
+
+
+class MessageSerializer(NodeSerializer):
+    owner = serializers.SerializerMethodField('_owner')
+
+    class Meta(NodeSerializer.Meta):
+        model = Message
+        fields = NodeSerializer.Meta.fields + ('title', 'body', 'city', 'region', 'country', 'owner')
+
+    def _owner(self, obj):
+        try:
+            return UsersManager().data(id=obj.uid)['result']
+        except Http404:
+            return {}
+
+    def save(self, **kwargs):
+        data = self.validated_data
+        country, region, city = (
+            data.get('country', ''),
+            data.get('region', ''),
+            data.get('city', '')
+        )
+        lng, lat, additional = address_to_geo(country, region, city, extended=True)
+        self.validated_data['country'] = additional.get('country', country.strip())
+        self.validated_data['region'] = additional.get('state', region.strip())
+        self.validated_data['city'] = additional.get('city', city.strip())
+        return super(MessageSerializer, self).save(**kwargs)
+
+
+class MessageListSerializer(NodeSerializer):
+    owner = serializers.SerializerMethodField('_owner')
+
+    class Meta(NodeSerializer.Meta):
+        model = Message
+        fields = NodeSerializer.Meta.fields + ('title', 'country', 'region', 'city', 'owner')
+
+    def _owner(self, obj):
+        try:
+            return UsersManager().data(id=obj.uid)['result']
+        except Http404:
+            return {}

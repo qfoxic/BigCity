@@ -1,5 +1,5 @@
 from mfs.nodes.managers import NodesManager
-from nodes.serializers import CategorySerializer, AdvertSerializer
+from nodes.serializers import CategorySerializer, AdvertSerializer, MessageSerializer
 
 
 class CategoryManager(NodesManager):
@@ -9,3 +9,6 @@ class CategoryManager(NodesManager):
 class AdvertManager(NodesManager):
     serializer = AdvertSerializer
 
+
+class MessageManager(NodesManager):
+    serializer = MessageSerializer
